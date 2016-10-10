@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">My App</string>
+    <string name="default_status">Hi</string>
+</resources>
