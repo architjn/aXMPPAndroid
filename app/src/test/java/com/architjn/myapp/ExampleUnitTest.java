@@ -1,4 +1,4 @@
-package com.abc.myapp;
+package com.architjn.myapp;
 
 import org.junit.Test;
 
