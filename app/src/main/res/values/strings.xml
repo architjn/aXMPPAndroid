@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">My App</string>
     <string name="default_status">Hi</string>
+    <string name="name">Name</string>
+    <string name="phono">Phone Number</string>
+    <string name="login">Login</string>
 </resources>

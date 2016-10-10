@@ -1,7 +1,9 @@
-package com.architjn.myapp;
+package com.architjn.myapp.ui.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.architjn.myapp.R;
 
 public class MainActivity extends AppCompatActivity {
 
