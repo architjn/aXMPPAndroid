@@ -19,10 +19,11 @@ public class SmackVCardHelper {
         this.con = con;
     }
 
-    public void save(String nickname, byte[] avatar) throws SmackInvocationException {
+    public void save(String nickname, String phno, byte[] avatar) throws SmackInvocationException {
         VCard vCard = new VCard();
         try {
             vCard.setNickName(nickname);
+            vCard.setPhoneHome("cell", phno);
             if (avatar != null) {
                 vCard.setAvatar(avatar);
             }

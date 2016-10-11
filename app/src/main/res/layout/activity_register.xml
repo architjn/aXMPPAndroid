@@ -8,6 +8,7 @@
     android:padding="16dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/avatar"
         android:layout_width="92dp"
         android:layout_height="92dp"
         android:src="@drawable/ic_person_black_92dp"
@@ -20,6 +21,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/name"
             android:hint="@string/name" />
     </android.support.design.widget.TextInputLayout>
 
@@ -28,6 +30,7 @@
         android:layout_height="wrap_content">
 
         <EditText
+            android:id="@+id/phno"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/phono" />
@@ -39,5 +42,6 @@
         android:layout_marginTop="20dp"
         android:backgroundTint="?attr/colorAccent"
         android:text="@string/login"
+        android:id="@+id/login"
         android:textColor="@android:color/white" />
 </LinearLayout>
