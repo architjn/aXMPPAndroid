@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.preference.Preference;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
@@ -79,10 +81,28 @@ public class XMPPConnection extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v("XMPPConnection", "starting service");
+        loginUser();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_LOGIN);
         filter.addAction(ACTION_SIGNUP);
         registerReceiver(br, filter);
         return START_STICKY;
+    }
+
+    private void loginUser() {
+        String username = PreferenceUtils.getField(this, PreferenceUtils.USER);
+        if (username != null) {
+            new AsyncTask<String, Void, Void>() {
+                @Override
+                protected Void doInBackground(String... strings) {
+                    try {
+                        XMPPHelper.getInstance(XMPPConnection.this).login(strings[0]);
+                    } catch (SmackInvocationException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            }.execute(username);
+        }
     }
 }

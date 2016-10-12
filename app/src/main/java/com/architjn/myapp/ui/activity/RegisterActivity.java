@@ -33,18 +33,19 @@ public class RegisterActivity extends AppCompatActivity {
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.v("RegisterActivity", intent.getAction());
             switch (intent.getAction()) {
                 case XMPPHelper.ACTION_STATE_CHANGED:
                     if (XMPPHelper.getState() == XMPPHelper.State.CONNECTING) {
                         pd = new ProgressDialog(context);
                         pd.setMessage("Logging in..");
                         pd.show();
-                        Log.v("RegisterActivity", "Connecting..");
                     } else if (XMPPHelper.getState() == XMPPHelper.State.CONNECTED) {
                         if (pd != null && pd.isShowing())
                             pd.dismiss();
-                        Log.v("RegisterActivity", "Connected");
+                        if (!isFinishing()) {
+                            startActivity(new Intent(context, MainActivity.class));
+                            finish();
+                        }
                     } else if (XMPPHelper.getState() == XMPPHelper.State.DISCONNECTED) {
                         if (pd != null && pd.isShowing())
                             pd.dismiss();
@@ -77,5 +78,11 @@ public class RegisterActivity extends AppCompatActivity {
                 sendBroadcast(broad);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(br);
     }
 }

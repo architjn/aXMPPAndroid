@@ -4,21 +4,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.architjn.myapp.R;
+import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.utils.Constants;
+import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.utils.Utils;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smackx.Form;
-import org.jivesoftware.smackx.ReportedData;
+import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.packet.VCard;
-import org.jivesoftware.smackx.search.UserSearchManager;
+import org.jivesoftware.smackx.provider.VCardProvider;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +36,7 @@ import java.util.Map;
 public class XMPPHelper {
 
     public static final String ACTION_STATE_CHANGED = "state_changed";
+    public static final String RESOURCE_PART = "Smack";
 
     private static XMPPHelper instance;
     private static Context context;
@@ -39,6 +48,7 @@ public class XMPPHelper {
 
     private XMPPHelper(Context context) {
         state = State.DISCONNECTED;
+        ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp", new VCardProvider());
     }
 
     public static XMPPHelper getInstance(Context context) {
@@ -73,13 +83,13 @@ public class XMPPHelper {
         Log.v("XMPPHelper", "creating connection");
         createConnection();
 
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, String> attributes = new HashMap<>();
         attributes.put("name", username);
         attributes.put("phno", phno);
         try {
             Log.v("XMPPHelper", "creating account");
             accountManager = new AccountManager(conn);
-            accountManager.createAccount(phno, "test", attributes);
+            accountManager.createAccount(phno, Utils.getPassword(phno), attributes);
             Log.v("XMPPHelper", "created account");
         } catch (Exception e) {
             if (!e.getMessage().startsWith("conflict")) {
@@ -89,6 +99,7 @@ public class XMPPHelper {
         }
 
         login(phno);
+        vCardHelper.save(username, phno, avatar);
     }
 
     public void login(String username) throws SmackInvocationException {
@@ -97,17 +108,18 @@ public class XMPPHelper {
         try {
             Log.v("XMPPHelper", "logging in");
             if (!conn.isAuthenticated()) {
-                conn.login(username, "test");
-//                conn.login(username, Utils.getPassword(username));
+                conn.login(username, Utils.getPassword(username), RESOURCE_PART);
                 Log.v("XMPPHelper", "loggedin");
-            } else Log.v("XMPPHelper", "connection not authenticated");
+            } else Log.v("XMPPHelper", "connection is authenticated");
 
             conn.sendPacket(new Presence(Presence.Type.available));
             vCardHelper = new SmackVCardHelper(context, conn);
+
             setState(State.CONNECTED);
 
+            PreferenceUtils.updateUser(context, username);
+
         } catch (Exception e) {
-            e.printStackTrace();
             setState(State.DISCONNECTED);
             throw new SmackInvocationException(e);
         }

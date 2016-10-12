@@ -2,7 +2,6 @@ package com.architjn.myapp.xmpp;
 
 import android.content.Context;
 
-
 import com.architjn.myapp.R;
 
 import org.jivesoftware.smack.XMPPConnection;
@@ -10,6 +9,7 @@ import org.jivesoftware.smackx.packet.VCard;
 
 public class SmackVCardHelper {
     public static final String FIELD_STATUS = "status";
+    public static final String FIELD_PHONE = "cell";
 
     private Context context;
     private XMPPConnection con;
@@ -20,13 +20,18 @@ public class SmackVCardHelper {
     }
 
     public void save(String nickname, String phno, byte[] avatar) throws SmackInvocationException {
+        save(nickname, phno, null, avatar);
+    }
+
+    public void save(String nickname, String phno, String jid, byte[] avatar) throws SmackInvocationException {
         VCard vCard = new VCard();
         try {
             vCard.setNickName(nickname);
-            vCard.setPhoneHome("cell", phno);
-            if (avatar != null) {
+            vCard.setPhoneHome(FIELD_PHONE, phno);
+            if (jid != null)
+                vCard.setJabberId(jid);
+            if (avatar != null)
                 vCard.setAvatar(avatar);
-            }
             vCard.setField(FIELD_STATUS, context.getString(R.string.default_status));
             vCard.save(con);
         } catch (Exception e) {
