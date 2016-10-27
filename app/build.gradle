@@ -26,5 +26,6 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '7.7.3'
     compile files('libs/smack.jar')
 }

@@ -1,10 +1,8 @@
 package com.architjn.myapp.xmpp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
-import com.architjn.myapp.R;
 import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.PreferenceUtils;
@@ -13,8 +11,6 @@ import com.architjn.myapp.utils.Utils;
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
@@ -24,9 +20,7 @@ import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.provider.VCardProvider;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,11 +29,12 @@ import java.util.Map;
 
 public class XMPPHelper {
 
-    public static final String ACTION_STATE_CHANGED = "state_changed";
     public static final String RESOURCE_PART = "Smack";
 
     private static XMPPHelper instance;
     private static Context context;
+    private ArrayList<OnStateChange> listeners;
+
     private AccountManager accountManager;
     private XMPPConnection conn;
     private SmackVCardHelper vCardHelper;
@@ -49,6 +44,12 @@ public class XMPPHelper {
     private XMPPHelper(Context context) {
         state = State.DISCONNECTED;
         ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp", new VCardProvider());
+        Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
+        listeners = new ArrayList<>();
+    }
+
+    public void addActionStateChanged(OnStateChange listener) {
+        listeners.add(listener);
     }
 
     public static XMPPHelper getInstance(Context context) {
@@ -61,6 +62,7 @@ public class XMPPHelper {
     private void createConnection() {
         if (conn != null)
             return;
+        Log.v("XMPPHelper", "creating connection");
         ConnectionConfiguration connConfig =
                 new ConnectionConfiguration(Constants.SERVERNAME,
                         Constants.PORT, Constants.SERVERNAME);
@@ -68,7 +70,6 @@ public class XMPPHelper {
 
         try {
             connection.connect();
-            Log.i("XMPPClient", "Connected to " + connection.getHost());
             conn = connection;
         } catch (XMPPException ex) {
             setState(State.DISCONNECTED);
@@ -80,7 +81,6 @@ public class XMPPHelper {
 
     public void signupAndLogin(String username, String phno, byte[] avatar) throws SmackInvocationException {
         setState(State.CONNECTING);
-        Log.v("XMPPHelper", "creating connection");
         createConnection();
 
         Map<String, String> attributes = new HashMap<>();
@@ -95,7 +95,8 @@ public class XMPPHelper {
             if (!e.getMessage().startsWith("conflict")) {
                 setState(State.DISCONNECTED);
                 throw new SmackInvocationException(e);
-            }
+            } else
+                Log.v("XMPPHelper", "account already exists");
         }
 
         login(phno);
@@ -115,20 +116,41 @@ public class XMPPHelper {
             conn.sendPacket(new Presence(Presence.Type.available));
             vCardHelper = new SmackVCardHelper(context, conn);
 
-            setState(State.CONNECTED);
-
             PreferenceUtils.updateUser(context, username);
 
         } catch (Exception e) {
             setState(State.DISCONNECTED);
+            e.printStackTrace();
             throw new SmackInvocationException(e);
         }
+        setState(State.CONNECTED);
+    }
+
+    public UserProfile search(String username) throws SmackInvocationException {
+        String name = StringUtils.parseName(username);
+        String jid = null;
+        if (name == null || name.trim().length() == 0) {
+            jid = username + "@" + conn.getServiceName();
+        } else {
+            jid = StringUtils.parseBareAddress(username);
+        }
+
+        if (vCardHelper == null) {
+            return null;
+        }
+
+        VCard vCard = vCardHelper.loadVCard(jid);
+        String nickname = vCard.getNickName();
+
+        return nickname == null ? null : new UserProfile(jid, vCard);
     }
 
     public void setState(State state) {
         XMPPHelper.state = state;
-        Intent br = new Intent(ACTION_STATE_CHANGED);
-        context.sendBroadcast(br);
+        for (OnStateChange listener : listeners) {
+            if (listener != null)
+                listener.stateChanged(state);
+        }
     }
 
     public static State getState() {
@@ -137,5 +159,9 @@ public class XMPPHelper {
 
     public enum State {
         DISCONNECTED, CONNECTING, CONNECTED
+    }
+
+    public interface OnStateChange {
+        void stateChanged(State state);
     }
 }

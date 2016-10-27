@@ -7,6 +7,7 @@ package com.architjn.myapp.utils;
 public class Constants {
 
     public static int PORT = 5222;
-    public static String SERVERNAME = "107.180.68.152";
+    public static String SERVERNAME = "52.32.181.170";
+//    public static String SERVERNAME = "107.180.68.152";
 
 }

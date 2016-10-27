@@ -3,6 +3,7 @@
     package="com.architjn.myapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".HomeApplication"
@@ -19,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.RegisterActivity" />
+        <activity android:name=".ui.activity.ContactsActivity" />
 
         <service android:name=".service.XMPPConnection" />
     </application>
