@@ -3,45 +3,53 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/avatar"
-        android:layout_width="92dp"
-        android:layout_height="92dp"
-        android:src="@drawable/ic_person_black_92dp"
-        app:civ_border_width="2dp" />
+    <include layout="@layout/toolbar" />
 
-    <android.support.design.widget.TextInputLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <EditText
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatar"
+            android:layout_width="92dp"
+            android:layout_height="92dp"
+            android:src="@drawable/ic_person_black_92dp"
+            app:civ_border_width="2dp" />
+
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/name"
-            android:hint="@string/name" />
-    </android.support.design.widget.TextInputLayout>
+            android:layout_height="wrap_content">
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/name" />
+        </android.support.design.widget.TextInputLayout>
 
-        <EditText
-            android:id="@+id/phno"
+        <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/phono" />
-    </android.support.design.widget.TextInputLayout>
+            android:layout_height="wrap_content">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="?attr/colorAccent"
-        android:text="@string/login"
-        android:id="@+id/login"
-        android:textColor="@android:color/white" />
+            <EditText
+                android:id="@+id/phno"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/phono" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="?attr/colorAccent"
+            android:text="@string/login"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
 </LinearLayout>

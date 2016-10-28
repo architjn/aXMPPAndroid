@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,7 +38,6 @@ import java.util.ArrayList;
 
 public class ContactsActivity extends AppCompatActivity {
 
-    private PhoneNumberUtil phoneUtil;
     private RecyclerView rv;
     private ContactAdapter adapter;
 
@@ -49,6 +49,7 @@ public class ContactsActivity extends AppCompatActivity {
     }
 
     private void init() {
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         rv = (RecyclerView) findViewById(R.id.contact_list);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 35)));
@@ -78,7 +79,7 @@ public class ContactsActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 adapter.updateItems(DbHelper.getInstance(ContactsActivity.this)
-                                .loadContacts());
+                        .loadContacts());
             }
 
             @Override

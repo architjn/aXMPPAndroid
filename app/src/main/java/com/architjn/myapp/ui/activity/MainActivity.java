@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.architjn.myapp.R;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
     }
 
     private void init() {
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         XMPPHelper.getInstance(this).addActionStateChanged(this);
         fab = (FloatingActionButton) findViewById(R.id.addChat);
         fab.setOnClickListener(new View.OnClickListener() {
