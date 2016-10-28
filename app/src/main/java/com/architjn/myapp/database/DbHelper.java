@@ -3,6 +3,7 @@ package com.architjn.myapp.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.architjn.myapp.model.Contact;
 
@@ -39,5 +40,9 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public void updateContacts(ArrayList<Contact> allUsers) {
         ContactsTable.updateWithNewUsers(this.getWritableDatabase(), allUsers);
+    }
+
+    public ArrayList<Contact> loadContacts() {
+        return ContactsTable.loadAllContacts(this.getWritableDatabase());
     }
 }

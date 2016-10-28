@@ -13,6 +13,7 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
@@ -111,10 +112,8 @@ public class XMPPHelper {
             if (!conn.isAuthenticated()) {
                 conn.login(username, Utils.getPassword(username), RESOURCE_PART);
                 Log.v("XMPPHelper", "loggedin");
+                onConnectionEstablished();
             } else Log.v("XMPPHelper", "connection is authenticated");
-
-            conn.sendPacket(new Presence(Presence.Type.available));
-            vCardHelper = new SmackVCardHelper(context, conn);
 
             PreferenceUtils.updateUser(context, username);
 
@@ -124,6 +123,13 @@ public class XMPPHelper {
             throw new SmackInvocationException(e);
         }
         setState(State.CONNECTED);
+    }
+
+    private void onConnectionEstablished() {
+        conn.sendPacket(new Presence(Presence.Type.available));
+        vCardHelper = new SmackVCardHelper(context, conn);
+        conn.addPacketListener(new PresencePacketListener(context),
+                new PacketTypeFilter(Presence.class));
     }
 
     public UserProfile search(String username) throws SmackInvocationException {

@@ -76,8 +76,8 @@ public class ContactsUtils {
             try {
                 UserProfile user = XMPPHelper.getInstance(context).search(info.getContactNumber());
                 if (user != null)
-                    userProfiles.add(new Contact(user.getJid(), user.getUserName(), user.getAvatar(),
-                            user.getNickname(), user.getStatus()));
+                    userProfiles.add(new Contact(null, user.getUserName(), user.getAvatar(),
+                            user.getNickname(), user.getStatus(), null));
             } catch (SmackInvocationException e) {
                 e.printStackTrace();
             }
