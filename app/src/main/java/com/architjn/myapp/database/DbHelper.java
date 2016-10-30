@@ -62,7 +62,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public void addConversation(UserProfile user, String msg, boolean sent) throws SmackInvocationException {
         ConversationTable.addConversation(context, this.getWritableDatabase(), user, msg, sent);
-        Log.v("aaa", user.getNickname() + " -- " + msg);
     }
 
     public ArrayList<Conversation> getAllConversations(String chatId){

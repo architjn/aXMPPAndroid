@@ -26,6 +26,7 @@ public class MessagePacketListener implements PacketListener {
             UserProfile user = XMPPHelper.getInstance(context).search(StringUtils.parseName(msg.getFrom()));
             DbHelper.getInstance(context).addConversation(user, msg.getBody(), false);
             context.sendBroadcast(new Intent(UPDATE_CHAT));
+            context.sendBroadcast(new Intent(user.getUserName()));
         } catch (SmackInvocationException e) {
             e.printStackTrace();
         }

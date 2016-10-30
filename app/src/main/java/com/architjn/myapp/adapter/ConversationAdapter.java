@@ -1,6 +1,8 @@
 package com.architjn.myapp.adapter;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 import com.architjn.myapp.R;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.Conversation;
+import com.architjn.myapp.xmpp.MessagePacketListener;
 
 import java.util.ArrayList;
 

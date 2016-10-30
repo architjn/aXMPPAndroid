@@ -1,5 +1,9 @@
 package com.architjn.myapp.ui.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +21,7 @@ import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.utils.Utils;
+import com.architjn.myapp.xmpp.MessagePacketListener;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
@@ -36,6 +41,15 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
     private ConversationAdapter adapter;
     private Chat chat;
     private LinearLayoutManager layout;
+    private BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().matches(currentUser.getPhoneNumber())) {
+                updateList();
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,7 +65,9 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
             chat = DbHelper.getInstance(this).getChat(currentUser.getId());
         } else if (getIntent().hasExtra("chatId")) {
             chat = DbHelper.getInstance(this).getChat(getIntent().getStringExtra("chatId"));
+            currentUser = DbHelper.getInstance(this).getContact(chat.getContactId());
         }
+        registerReceiver(br, new IntentFilter(currentUser.getPhoneNumber()));
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle(Utils.getContactName(this, currentUser.getPhoneNumber()));
         rv = (RecyclerView) findViewById(R.id.conv_list);
@@ -76,6 +92,7 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
     protected void onDestroy() {
         super.onDestroy();
         currentUser = null;
+        unregisterReceiver(br);
     }
 
     @Override
@@ -92,9 +109,7 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
                                     .search(StringUtils.parseName(currentUser.getJid()));
                             DbHelper.getInstance(ConversationActivity.this).addConversation(user,
                                     msg.getText().toString(), true);
-                            adapter.updateItems(DbHelper.getInstance(ConversationActivity.this)
-                                    .getAllConversations(chat.getId()));
-                            layout.scrollToPosition(adapter.getItemCount() - 1);
+                            updateList();
                             msg.setText(null);
                         } catch (SmackInvocationException e) {
                             e.printStackTrace();
@@ -110,5 +125,11 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
                 }
             });
         }
+    }
+
+    private void updateList() {
+        adapter.updateItems(DbHelper.getInstance(ConversationActivity.this)
+                .getAllConversations(chat.getId()));
+        layout.scrollToPosition(adapter.getItemCount() - 1);
     }
 }
