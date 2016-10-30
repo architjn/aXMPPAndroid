@@ -1,6 +1,7 @@
 package com.architjn.myapp.ui.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -52,11 +53,19 @@ public class ContactsActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         rv = (RecyclerView) findViewById(R.id.contact_list);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 35)));
+        rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 40)));
         adapter = new ContactAdapter(ContactsActivity.this,
                 DbHelper.getInstance(ContactsActivity.this)
                         .loadContacts());
         rv.setAdapter(adapter);
+        adapter.setOnClickListener(new ContactAdapter.OnItemSelected() {
+            @Override
+            public void itemSelected(Contact contact) {
+                Intent i = new Intent(ContactsActivity.this, ConversationActivity.class);
+                i.putExtra("id", contact.getId());
+                startActivity(i);
+            }
+        });
         PermissionUtils.checkPermission(Manifest.permission.READ_CONTACTS,
                 new PermissionUtils.Callback() {
                     @Override
@@ -84,9 +93,9 @@ public class ContactsActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
+                Log.v("qqq", "checking contacts");
                 ArrayList<PhoneContactInfo> allContacts = ContactsUtils.getAllPhoneContacts(ContactsActivity.this);
-                ArrayList<Contact> allUsers = ContactsUtils.getAllUserContacts(ContactsActivity.this, allContacts);
-                DbHelper.getInstance(ContactsActivity.this).updateContacts(allUsers);
+                ContactsUtils.getAllUserContacts(ContactsActivity.this, allContacts);
                 return null;
             }
         }.execute();

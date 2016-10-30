@@ -5,4 +5,6 @@
     <string name="phono">Phone Number</string>
     <string name="login">Login</string>
     <string name="contacts">Contacts</string>
+    <string name="enter_message">Say Something...</string>
+    <string name="not_connected">Not connected</string>
 </resources>

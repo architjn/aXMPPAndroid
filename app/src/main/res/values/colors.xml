@@ -4,4 +4,10 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="divider_dark">#cccccc</color>
+    <color name="quantum_pink200">#fff48fb1</color>
+    <color name="quantum_pink300">#fff06292</color>
+    <color name="quantum_pink400">#ffec407a</color>
+    <color name="quantum_cyan400">#ff26c6da</color>
+    <color name="quantum_cyan600">#ff00acc1</color>
+    <color name="quantum_cyan800">#ff00838f</color>
 </resources>

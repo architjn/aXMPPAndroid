@@ -2,6 +2,7 @@ package com.architjn.myapp.xmpp;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.utils.Constants;
@@ -13,7 +14,10 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
@@ -42,7 +46,7 @@ public class XMPPHelper {
 
     private static State state;
 
-    private XMPPHelper(Context context) {
+    private XMPPHelper() {
         state = State.DISCONNECTED;
         ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp", new VCardProvider());
         Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
@@ -51,12 +55,13 @@ public class XMPPHelper {
 
     public void addActionStateChanged(OnStateChange listener) {
         listeners.add(listener);
+        listener.stateChanged(state);
     }
 
     public static XMPPHelper getInstance(Context context) {
         XMPPHelper.context = context;
         if (instance == null)
-            instance = new XMPPHelper(context);
+            instance = new XMPPHelper();
         return instance;
     }
 
@@ -128,8 +133,26 @@ public class XMPPHelper {
     private void onConnectionEstablished() {
         conn.sendPacket(new Presence(Presence.Type.available));
         vCardHelper = new SmackVCardHelper(context, conn);
+        conn.addPacketListener(new MessagePacketListener(context), new MessageTypeFilter(Message.Type.chat));
         conn.addPacketListener(new PresencePacketListener(context),
                 new PacketTypeFilter(Presence.class));
+    }
+
+    public void sendChatMessage(String to, String body, PacketExtension packetExtension) throws SmackInvocationException {
+        if (to == null){
+            Toast.makeText(context, "User Invalid", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Message message = new Message(to, Message.Type.chat);
+        message.setBody(body);
+        if (packetExtension != null) {
+            message.addExtension(packetExtension);
+        }
+        try {
+            conn.sendPacket(message);
+        } catch (Exception e) {
+            throw new SmackInvocationException(e);
+        }
     }
 
     public UserProfile search(String username) throws SmackInvocationException {

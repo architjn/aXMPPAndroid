@@ -1,11 +1,14 @@
 package com.architjn.myapp.database;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.architjn.myapp.model.Contact;
+import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.xmpp.SmackInvocationException;
+import com.architjn.myapp.xmpp.XMPPHelper;
 
 import java.util.ArrayList;
 
@@ -23,6 +26,7 @@ public class ContactsTable {
     private static final String DP = "cont_dp";
     private static final String LAST_SEEN = "cont_last_seen";
     private static final String STATUS = "cont_status";
+    private static final String JID = "cont_jid";
     private static final String IS_CONTACT = "cont_is_contact";
 
     public static void onCreate(SQLiteDatabase database) {
@@ -32,6 +36,7 @@ public class ContactsTable {
                 PHONE + " TEXT," +
                 DP + " TEXT," +
                 STATUS + " TEXT," +
+                JID + " TEXT," +
                 LAST_SEEN + " TIMESTAMP," +
                 IS_CONTACT + " INTEGER DEFAULT 1)";
         database.execSQL(SQL_CREATE_TABLE);
@@ -40,34 +45,39 @@ public class ContactsTable {
     public static void onUpgrade(SQLiteDatabase database) {
     }
 
-    static void updateWithNewUsers(SQLiteDatabase db, ArrayList<Contact> allUsers) {
+    static void updateWithNewUsers(SQLiteDatabase db, ArrayList<Contact> allUsers, boolean isContact) {
         for (Contact c : allUsers) {
             String id = doesUserExists(db, c.getPhoneNumber());
             if (id == null) {
-                addUser(db, c);
-            } else updateUser(db, c, id);
+                addUser(db, c, isContact);
+            } else updateUser(db, c, id, isContact);
         }
     }
 
-    private static void updateUser(SQLiteDatabase db, Contact c, String id) {
+    private static void updateUser(SQLiteDatabase db, Contact c, String id, boolean isContact) {
         ContentValues values = new ContentValues();
         values.put(NAME, c.getName());
         values.put(STATUS, c.getStatus());
         values.put(PHONE, c.getPhoneNumber());
         values.putNull(DP);
         values.putNull(LAST_SEEN);
+        if (isContact)
+            values.put(IS_CONTACT, 1);
         db.update(TABLE_NAME, values, ID + " = ?", new String[]{id});
     }
 
-    private static void addUser(SQLiteDatabase db, Contact c) {
+    private static long addUser(SQLiteDatabase db, Contact c, boolean isContact) {
         ContentValues values = new ContentValues();
         values.putNull(ID);
         values.put(NAME, c.getName());
         values.put(PHONE, c.getPhoneNumber());
         values.put(STATUS, c.getStatus());
+        values.put(JID, c.getJid());
         values.putNull(DP);
         values.putNull(LAST_SEEN);
-        db.insert(TABLE_NAME, null, values);
+        if (isContact)
+            values.put(IS_CONTACT, 1);
+        return db.insert(TABLE_NAME, null, values);
     }
 
     private static String doesUserExists(SQLiteDatabase db, String number) {
@@ -78,15 +88,48 @@ public class ContactsTable {
 
     static ArrayList<Contact> loadAllContacts(SQLiteDatabase db) {
         ArrayList<Contact> contacts = new ArrayList<>();
-        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + IS_CONTACT + " = ?", new String[]{"1"});
         if (c.moveToFirst()) {
             do {
                 contacts.add(new Contact(c.getString(c.getColumnIndex(ID)),
                         c.getString(c.getColumnIndex(PHONE)), c.getString(c.getColumnIndex(DP)),
                         c.getString(c.getColumnIndex(NAME)), c.getString(c.getColumnIndex(STATUS)),
-                        c.getString(c.getColumnIndex(LAST_SEEN))));
+                        c.getString(c.getColumnIndex(LAST_SEEN)), c.getString(c.getColumnIndex(JID))));
             } while (c.moveToNext());
         }
         return contacts;
+    }
+
+    public static Contact getUser(SQLiteDatabase db, String id) {
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?", new String[]{id});
+        if (c.moveToFirst())
+            return new Contact(c.getString(c.getColumnIndex(ID)),
+                    c.getString(c.getColumnIndex(PHONE)), c.getString(c.getColumnIndex(DP)),
+                    c.getString(c.getColumnIndex(NAME)), c.getString(c.getColumnIndex(STATUS)),
+                    c.getString(c.getColumnIndex(LAST_SEEN)), c.getString(c.getColumnIndex(JID)));
+        else return null;
+    }
+
+    public static void updateWithNewUser(SQLiteDatabase db, Contact c) {
+        String id = doesUserExists(db, c.getPhoneNumber());
+        if (id == null) {
+            addUser(db, c, true);
+        } else updateUser(db, c, id, true);
+    }
+
+    public static Contact getUserWithMobile(Context context, SQLiteDatabase db, String mobile, boolean isContact)
+            throws SmackInvocationException {
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + PHONE + " = ?", new String[]{mobile});
+        if (c.moveToFirst())
+            return new Contact(c.getString(c.getColumnIndex(ID)),
+                    c.getString(c.getColumnIndex(PHONE)), c.getString(c.getColumnIndex(DP)),
+                    c.getString(c.getColumnIndex(NAME)), c.getString(c.getColumnIndex(STATUS)),
+                    c.getString(c.getColumnIndex(LAST_SEEN)), c.getString(c.getColumnIndex(JID)));
+        else {
+            UserProfile user = XMPPHelper.getInstance(context).search(mobile);
+            return getUser(db, String.valueOf(addUser(db, new Contact(null, user.getUserName(),
+                    user.getAvatar(), user.getNickname(), user.getStatus(),
+                    null, user.getJid()), isContact)));
+        }
     }
 }

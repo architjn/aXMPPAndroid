@@ -41,12 +41,6 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
     @Override
     public void stateChanged(XMPPHelper.State state) {
         if (state == XMPPHelper.State.CONNECTED) {
-            /*try {
-                UserProfile abc = XMPPHelper.getInstance(this).search("7838864992");
-                Log.v("MainActivity", abc.getName() + " <<");
-            } catch (SmackInvocationException e) {
-                e.printStackTrace();
-            }*/
         }
     }
 }

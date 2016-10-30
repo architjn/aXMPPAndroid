@@ -27,6 +27,7 @@
         <activity
             android:name=".ui.activity.ContactsActivity"
             android:label="@string/contacts" />
+        <activity android:name=".ui.activity.ConversationActivity" />
 
         <service android:name=".service.XMPPConnection" />
     </application>

@@ -1,6 +1,9 @@
 package com.architjn.myapp.utils;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
 import android.util.DisplayMetrics;
 
 import java.util.zip.CRC32;
@@ -23,5 +26,17 @@ public class Utils {
     public static int dpToPx(Context context, int dp) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static String getContactName(Context context, String phno) {
+        if (phno.isEmpty())
+            return "";
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.
+                CONTENT_FILTER_URI, Uri.encode(phno));
+        Cursor c = context.getContentResolver().query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME},
+                null, null, null);
+        if (c.moveToFirst())
+            return c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        else return phno;
     }
 }
