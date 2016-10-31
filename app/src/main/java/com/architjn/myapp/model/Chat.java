@@ -5,12 +5,12 @@ package com.architjn.myapp.model;
  */
 
 public class Chat {
-    private final String id;
-    private final String contactId;
-    private final String updatedOn;
-    private final String lastMsg;
-    private final boolean isArchived;
-    private final boolean isGroup;
+    private String id;
+    private String contactId;
+    private String updatedOn;
+    private String lastMsg;
+    private boolean isArchived;
+    private boolean isGroup;
 
     public Chat(String id, String contactId, String updatedOn, String lastMsg,
                 int isArchived, int isGroup) {
@@ -44,5 +44,14 @@ public class Chat {
 
     public String getLastMsg() {
         return lastMsg;
+    }
+
+    public void update(Chat chat) {
+        this.id = chat.id;
+        this.contactId = chat.getContactId();
+        this.updatedOn = chat.getUpdatedOn();
+        this.lastMsg = chat.getLastMsg();
+        this.isArchived = chat.isArchived();
+        this.isGroup = chat.isGroup();
     }
 }

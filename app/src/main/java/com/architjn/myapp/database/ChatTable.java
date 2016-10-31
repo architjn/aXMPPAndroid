@@ -36,7 +36,6 @@ public class ChatTable {
 
     public static void onUpgrade(SQLiteDatabase database) {
     }
-
     static String getChatId(SQLiteDatabase db, Contact contact) {
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_ID + " = ?", new String[]{contact.getId()});
         if (c.moveToFirst())
@@ -44,7 +43,8 @@ public class ChatTable {
         ContentValues values = new ContentValues();
         values.putNull(ID);
         values.put(CONTACT_ID, contact.getId());
-        return String.valueOf(db.insert(TABLE_NAME, null, values));
+        String id = String.valueOf(db.insert(TABLE_NAME, null, values));
+        return id;
     }
 
     static Chat getChatByUserId(SQLiteDatabase db, String id) {
@@ -95,4 +95,5 @@ public class ChatTable {
         values.put(UPDATED_ON, currentTimestamp.toString());
         db.update(TABLE_NAME, values, ID + "= ?", new String[]{chatId});
     }
+
 }

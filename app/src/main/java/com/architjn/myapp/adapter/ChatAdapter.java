@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.architjn.myapp.R;
+import com.architjn.myapp.database.ChatTable;
+import com.architjn.myapp.database.ConversationTable;
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
@@ -31,6 +33,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public ChatAdapter(Context context, ArrayList<Chat> items) {
         this.context = context;
         this.items = items;
+        ConversationTable.setContentChangedListener(new ConversationTable.OnContentChanged() {
+            @Override
+            public void contentChanged(Chat chat) {
+                updateChatItem(chat);
+            }
+        });
+    }
+
+    private void updateChatItem(Chat chat) {
+        items = DbHelper.getInstance(context).getAllChats();
+        notifyDataSetChanged();
     }
 
     public void setOnClickListener(OnItemSelected callback) {
@@ -45,8 +58,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
+        Log.v("aaa", "called for "+position);
         final Chat item = items.get(position);
-        Log.v("aaa", item.getId() + " <<");
         holder.name.setText(
                 Utils.getContactName(context, DbHelper.getInstance(context)
                         .getContact(item.getContactId())
@@ -64,12 +77,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public int getItemCount() {
         return items.size();
     }
-
-    public void updateItems(ArrayList<Chat> contacts) {
-        this.items = contacts;
-        notifyDataSetChanged();
-    }
-
 
     protected static class ViewHolder extends RecyclerView.ViewHolder {
         private final CircleImageView photo;

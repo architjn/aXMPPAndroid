@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.Conversation;
 import com.architjn.myapp.model.UserProfile;
@@ -31,6 +32,8 @@ public class ConversationTable {
     private static final String STARRED = "conv_starred";
     private static final String TYPE = "conv_type";
 
+    private static OnContentChanged listener;
+
     public static void onCreate(SQLiteDatabase database) {
         String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -43,6 +46,10 @@ public class ConversationTable {
     }
 
     public static void onUpgrade(SQLiteDatabase database) {
+    }
+
+    public static void setContentChangedListener(OnContentChanged listener1) {
+        listener = listener1;
     }
 
     static void addConversation(Context context, SQLiteDatabase db, UserProfile user, String msg, boolean sent)
@@ -58,6 +65,8 @@ public class ConversationTable {
         else values.put(TYPE, 0);
         db.insert(TABLE_NAME, null, values);
         ChatTable.updateTime(db, chatId);
+        if (listener != null)
+            listener.contentChanged(ChatTable.getChat(db, chatId));
     }
 
     public static ArrayList<Conversation> getAllConversation(SQLiteDatabase db, String chatId) {
@@ -82,5 +91,9 @@ public class ConversationTable {
         }
         return null;
     }
+    public interface OnContentChanged {
+        void contentChanged(Chat chat);
+    }
+
 
 }
