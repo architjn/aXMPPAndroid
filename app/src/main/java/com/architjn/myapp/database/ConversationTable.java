@@ -57,6 +57,7 @@ public class ConversationTable {
         if (sent) values.put(TYPE, 1);
         else values.put(TYPE, 0);
         db.insert(TABLE_NAME, null, values);
+        ChatTable.updateTime(db, chatId);
     }
 
     public static ArrayList<Conversation> getAllConversation(SQLiteDatabase db, String chatId) {
@@ -71,6 +72,15 @@ public class ConversationTable {
             } while (c.moveToNext());
         }
         return conversations;
+    }
+
+    public static String getLastChatMsg(SQLiteDatabase db, String chatId) {
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + CHAT_ID +
+                " = ? ORDER BY " + ID + " DESC LIMIT 1", new String[]{chatId});
+        if (c.moveToFirst()) {
+            return c.getString(c.getColumnIndex(MESSAGE));
+        }
+        return null;
     }
 
 }

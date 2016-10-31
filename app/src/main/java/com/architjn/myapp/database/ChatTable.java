@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+
 /**
  * Created by architjn on 10/27/2016.
  */
@@ -44,16 +47,52 @@ public class ChatTable {
         return String.valueOf(db.insert(TABLE_NAME, null, values));
     }
 
-    public static Chat getChat(SQLiteDatabase db, String id) {
+    static Chat getChatByUserId(SQLiteDatabase db, String id) {
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_ID + " = ?", new String[]{id});
-        if (c.moveToFirst())
+        if (c.moveToFirst()) {
+            String lastMsg = ConversationTable.getLastChatMsg(db, c.getString(c.getColumnIndex(ID)));
             return new Chat(c.getString(c.getColumnIndex(ID)), c.getString(c.getColumnIndex(CONTACT_ID)),
-                    c.getString(c.getColumnIndex(UPDATED_ON)), c.getInt(c.getColumnIndex(IS_ARCHIVED)),
+                    c.getString(c.getColumnIndex(UPDATED_ON)), lastMsg, c.getInt(c.getColumnIndex(IS_ARCHIVED)),
                     c.getInt(c.getColumnIndex(IS_GROUP)));
+        }
         ContentValues values = new ContentValues();
         values.putNull(ID);
         values.put(CONTACT_ID, id);
         db.insert(TABLE_NAME, null, values);
-        return getChat(db, id);
+        return getChatByUserId(db, id);
+    }
+
+    static Chat getChat(SQLiteDatabase db, String id) {
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?", new String[]{id});
+        if (c.moveToFirst()) {
+            String lastMsg = ConversationTable.getLastChatMsg(db, c.getString(c.getColumnIndex(ID)));
+            return new Chat(c.getString(c.getColumnIndex(ID)), c.getString(c.getColumnIndex(CONTACT_ID)),
+                    c.getString(c.getColumnIndex(UPDATED_ON)), lastMsg, c.getInt(c.getColumnIndex(IS_ARCHIVED)),
+                    c.getInt(c.getColumnIndex(IS_GROUP)));
+        }
+        return null;
+    }
+
+    static ArrayList<Chat> getAllChats(SQLiteDatabase db) {
+        ArrayList<Chat> chats = new ArrayList<>();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " ORDER BY " + UPDATED_ON + " DESC", null);
+        if (c.moveToFirst())
+            do {
+                String lastMsg = ConversationTable.getLastChatMsg(db, c.getString(c.getColumnIndex(ID)));
+                if (lastMsg != null)
+                    chats.add(new Chat(c.getString(c.getColumnIndex(ID)), c.getString(c.getColumnIndex(CONTACT_ID)),
+                            c.getString(c.getColumnIndex(UPDATED_ON)), lastMsg, c.getInt(c.getColumnIndex(IS_ARCHIVED)),
+                            c.getInt(c.getColumnIndex(IS_GROUP))));
+            } while (c.moveToNext());
+        return chats;
+    }
+
+    static void updateTime(SQLiteDatabase db, String chatId) {
+        ContentValues values = new ContentValues();
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date now = calendar.getTime();
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+        values.put(UPDATED_ON, currentTimestamp.toString());
+        db.update(TABLE_NAME, values, ID + "= ?", new String[]{chatId});
     }
 }

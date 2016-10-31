@@ -10,4 +10,8 @@
     <color name="quantum_cyan400">#ff26c6da</color>
     <color name="quantum_cyan600">#ff00acc1</color>
     <color name="quantum_cyan800">#ff00838f</color>
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_300">#4DB6AC</color>
+    <color name="teal_400">#26A69A</color>
+    <color name="grey">#f5f5f5</color>
 </resources>

@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/colorPrimary"
+    android:elevation="4dp"
     android:foreground="?attr/selectableItemBackground"
     android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
     android:theme="@style/ThemeOverlay.AppCompat.Dark" />

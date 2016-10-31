@@ -8,13 +8,16 @@ public class Chat {
     private final String id;
     private final String contactId;
     private final String updatedOn;
+    private final String lastMsg;
     private final boolean isArchived;
     private final boolean isGroup;
 
-    public Chat(String id, String contactId, String updatedOn, int isArchived, int isGroup) {
+    public Chat(String id, String contactId, String updatedOn, String lastMsg,
+                int isArchived, int isGroup) {
         this.id = id;
         this.contactId = contactId;
         this.updatedOn = updatedOn;
+        this.lastMsg = lastMsg;
         this.isArchived = isArchived == 1;
         this.isGroup = isGroup == 1;
     }
@@ -37,5 +40,9 @@ public class Chat {
 
     public boolean isGroup() {
         return isGroup;
+    }
+
+    public String getLastMsg() {
+        return lastMsg;
     }
 }

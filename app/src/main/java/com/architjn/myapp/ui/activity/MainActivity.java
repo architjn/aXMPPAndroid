@@ -4,16 +4,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
+import com.architjn.myapp.ListDividerItemDecoration;
 import com.architjn.myapp.R;
+import com.architjn.myapp.adapter.ChatAdapter;
+import com.architjn.myapp.database.DbHelper;
+import com.architjn.myapp.model.Chat;
+import com.architjn.myapp.model.Conversation;
 import com.architjn.myapp.utils.PreferenceUtils;
+import com.architjn.myapp.utils.Utils;
 import com.architjn.myapp.xmpp.XMPPHelper;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStateChange {
 
     private FloatingActionButton fab;
+    private RecyclerView rv;
+    private ChatAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +42,20 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         XMPPHelper.getInstance(this).addActionStateChanged(this);
+        rv = (RecyclerView) findViewById(R.id.chat_list);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        ArrayList<Chat> items = DbHelper.getInstance(this).getAllChats();
+        rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 40)));
+        adapter = new ChatAdapter(this, items);
+        rv.setAdapter(adapter);
+        adapter.setOnClickListener(new ChatAdapter.OnItemSelected() {
+            @Override
+            public void itemSelected(Chat chat) {
+                Intent i = new Intent(MainActivity.this, ConversationActivity.class);
+                i.putExtra("chatId", String.valueOf(chat.getId()));
+                startActivity(i);
+            }
+        });
         fab = (FloatingActionButton) findViewById(R.id.addChat);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

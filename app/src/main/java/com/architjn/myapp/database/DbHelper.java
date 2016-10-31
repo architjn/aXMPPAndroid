@@ -3,7 +3,6 @@ package com.architjn.myapp.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
@@ -68,7 +67,15 @@ public class DbHelper extends SQLiteOpenHelper {
         return ConversationTable.getAllConversation(this.getWritableDatabase(),chatId);
     }
 
-    public Chat getChat(String id) {
-        return ChatTable.getChat(this.getWritableDatabase(), id);
+    public Chat getChatByUserId(String id) {
+        return ChatTable.getChatByUserId(this.getWritableDatabase(), id);
+    }
+
+    public ArrayList<Chat> getAllChats() {
+        return ChatTable.getAllChats(this.getWritableDatabase());
+    }
+
+    public Chat getChat(String chatId) {
+        return ChatTable.getChat(this.getWritableDatabase(), chatId);
     }
 }

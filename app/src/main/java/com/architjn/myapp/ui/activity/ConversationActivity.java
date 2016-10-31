@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -21,7 +22,6 @@ import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.utils.Utils;
-import com.architjn.myapp.xmpp.MessagePacketListener;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
@@ -62,8 +62,9 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
         chat = null;
         if (getIntent().hasExtra("id")) {
             currentUser = DbHelper.getInstance(this).getContact(getIntent().getStringExtra("id"));
-            chat = DbHelper.getInstance(this).getChat(currentUser.getId());
+            chat = DbHelper.getInstance(this).getChatByUserId(currentUser.getId());
         } else if (getIntent().hasExtra("chatId")) {
+            Log.v("chatId", getIntent().getStringExtra("chatId"));
             chat = DbHelper.getInstance(this).getChat(getIntent().getStringExtra("chatId"));
             currentUser = DbHelper.getInstance(this).getContact(chat.getContactId());
         }

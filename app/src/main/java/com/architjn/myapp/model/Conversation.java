@@ -9,7 +9,7 @@ public class Conversation {
     private final String chatId;
     private final String senderId;
     private final String starred;
-    private boolean received;
+    private boolean sent;
 
     public Conversation(String id, String message, String chatId, String senderId, String starred, int type) {
         this.id = id;
@@ -17,11 +17,11 @@ public class Conversation {
         this.chatId = chatId;
         this.senderId = senderId;
         this.starred = starred;
-        received = type != 1;
+        sent = type != 1;
     }
 
-    public boolean isReceived() {
-        return received;
+    public boolean isSent() {
+        return sent;
     }
 
     public String getId() {
