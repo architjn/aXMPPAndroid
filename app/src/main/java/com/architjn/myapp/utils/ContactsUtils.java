@@ -36,10 +36,8 @@ public class ContactsUtils {
                 String contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 String contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 int phoneContactID = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID));
-                Log.v("qqq", "checking - " + contactName);
                 if (contactNumber.startsWith("*") || contactNumber.startsWith("#") || !isNumberValid(contactNumber))
                     continue;
-                Log.v("qqq", "passed - " + contactName);
                 phoneContactInfo = new PhoneContactInfo();
                 phoneContactInfo.setPhoneContactID(phoneContactID);
                 phoneContactInfo.setContactName(contactName);
@@ -75,9 +73,12 @@ public class ContactsUtils {
         for (PhoneContactInfo info : allContacts)
             try {
                 UserProfile user = XMPPHelper.getInstance(context).search(info.getContactNumber());
-                if (user != null)
+                Log.v("aaa", info.getContactName() + " -- " + info.getContactNumber());
+                if (user != null) {
+                    Log.v("aaa", "passed ^");
                     DbHelper.getInstance(context).updateContact(new Contact(null, user.getUserName(), user.getAvatar(),
                             user.getNickname(), user.getStatus(), null, user.getJid()));
+                }
             } catch (SmackInvocationException e) {
                 e.printStackTrace();
             }

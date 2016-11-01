@@ -9,14 +9,17 @@ public class Conversation {
     private final String chatId;
     private final String senderId;
     private final String starred;
+    private final String time;
     private boolean sent;
 
-    public Conversation(String id, String message, String chatId, String senderId, String starred, int type) {
+    public Conversation(String id, String message, String chatId, String senderId,
+                        String starred,String time, int type) {
         this.id = id;
         this.message = message;
         this.chatId = chatId;
         this.senderId = senderId;
         this.starred = starred;
+        this.time = time;
         sent = type != 1;
     }
 
@@ -42,5 +45,9 @@ public class Conversation {
 
     public String getStarred() {
         return starred;
+    }
+
+    public String getTime() {
+        return time;
     }
 }

@@ -33,17 +33,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public ChatAdapter(Context context, ArrayList<Chat> items) {
         this.context = context;
         this.items = items;
-        ConversationTable.setContentChangedListener(new ConversationTable.OnContentChanged() {
-            @Override
-            public void contentChanged(Chat chat) {
-                updateChatItem(chat);
-            }
-        });
-    }
-
-    private void updateChatItem(Chat chat) {
-        items = DbHelper.getInstance(context).getAllChats();
-        notifyDataSetChanged();
     }
 
     public void setOnClickListener(OnItemSelected callback) {
@@ -56,9 +45,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         return new ViewHolder(v);
     }
 
+    public void update(ArrayList<Chat> items) {
+        this.items = items;
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        Log.v("aaa", "called for "+position);
         final Chat item = items.get(position);
         holder.name.setText(
                 Utils.getContactName(context, DbHelper.getInstance(context)

@@ -9,15 +9,17 @@ public class Chat {
     private String contactId;
     private String updatedOn;
     private String lastMsg;
+    private final int color;
     private boolean isArchived;
     private boolean isGroup;
 
-    public Chat(String id, String contactId, String updatedOn, String lastMsg,
+    public Chat(String id, String contactId, String updatedOn, String lastMsg, int color,
                 int isArchived, int isGroup) {
         this.id = id;
         this.contactId = contactId;
         this.updatedOn = updatedOn;
         this.lastMsg = lastMsg;
+        this.color = color;
         this.isArchived = isArchived == 1;
         this.isGroup = isGroup == 1;
     }
@@ -53,5 +55,9 @@ public class Chat {
         this.lastMsg = chat.getLastMsg();
         this.isArchived = chat.isArchived();
         this.isGroup = chat.isGroup();
+    }
+
+    public int getColor() {
+        return color;
     }
 }

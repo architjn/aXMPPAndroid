@@ -1,6 +1,9 @@
 package com.architjn.myapp.ui.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +21,7 @@ import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Conversation;
 import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.utils.Utils;
+import com.architjn.myapp.xmpp.MessagePacketListener;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
 import java.util.ArrayList;
@@ -27,6 +31,16 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
     private FloatingActionButton fab;
     private RecyclerView rv;
     private ChatAdapter adapter;
+    private BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().matches(MessagePacketListener.UPDATE_CHAT)) {
+                items = DbHelper.getInstance(context).getAllChats();
+                adapter.update(items);
+            }
+        }
+    };
+    private ArrayList<Chat> items;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +56,10 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         XMPPHelper.getInstance(this).addActionStateChanged(this);
+        registerReceiver(br, new IntentFilter(MessagePacketListener.UPDATE_CHAT));
         rv = (RecyclerView) findViewById(R.id.chat_list);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        ArrayList<Chat> items = DbHelper.getInstance(this).getAllChats();
+        items = DbHelper.getInstance(this).getAllChats();
         rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 40)));
         adapter = new ChatAdapter(this, items);
         rv.setAdapter(adapter);

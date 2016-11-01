@@ -7,6 +7,11 @@
     android:gravity="right"
     android:orientation="horizontal">
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_img"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
     <LinearLayout
         android:id="@+id/bg_holder"
         android:layout_width="wrap_content"

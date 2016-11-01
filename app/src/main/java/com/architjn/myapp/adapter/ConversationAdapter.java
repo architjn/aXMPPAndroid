@@ -12,6 +12,8 @@ import com.architjn.myapp.model.Conversation;
 
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 /**
  * Created by HP on 21-05-2016.
  */
@@ -50,6 +52,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     public void onBindViewHolder(ViewHolder holder, final int position) {
         if (position == items.size())
             return;
+        holder.userImg.setVisibility(View.INVISIBLE);
         setBackground(holder, position);
         final Conversation item = items.get(position);
         holder.text.setText(item.getMessage());
@@ -64,17 +67,29 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     private void setBackground(ViewHolder holder, int position) {
         if (items.get(position).isSent()) {
             if (position == 0) {
-                if (items.size() - 1 != position && items.get(position + 1).isSent())
+                if (items.size() - 1 != position && items.get(position + 1).isSent()) {
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left_top);
-                else holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left);
+                    holder.userImg.setVisibility(View.VISIBLE);
+                    holder.userImg.setImageResource(R.drawable.ic_account_black_56dp);
+                } else {
+                    holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left);
+                    holder.userImg.setVisibility(View.VISIBLE);
+                    holder.userImg.setImageResource(R.drawable.ic_account_black_56dp);
+                }
             } else if (items.get(position - 1).isSent()) {
                 if (items.size() - 1 != position && items.get(position + 1).isSent())
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left_middle);
                 else holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left_bottom);
             } else {
-                if (items.size() - 1 != position && items.get(position + 1).isSent())
+                if (items.size() - 1 != position && items.get(position + 1).isSent()) {
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left_top);
-                else holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left);
+                    holder.userImg.setVisibility(View.VISIBLE);
+                    holder.userImg.setImageResource(R.drawable.ic_account_black_56dp);
+                } else {
+                    holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_left);
+                    holder.userImg.setVisibility(View.VISIBLE);
+                    holder.userImg.setImageResource(R.drawable.ic_account_black_56dp);
+                }
             }
         } else {
             if (position == 0) {
@@ -107,12 +122,14 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView text;
         private final View mainView, bgHolder;
+        private final CircleImageView userImg;
 
         ViewHolder(View itemView) {
             super(itemView);
             mainView = itemView;
             text = (TextView) itemView.findViewById(R.id.text);
             bgHolder = itemView.findViewById(R.id.bg_holder);
+            userImg = (CircleImageView) itemView.findViewById(R.id.user_img);
         }
     }
 
