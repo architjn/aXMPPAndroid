@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 public class PreferenceUtils {
 
     public static String USER = "user";
+    public static String REGISTRATION_STATE = "regState";
 
     public static void updateUser(Context context, String user) {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -19,6 +20,16 @@ public class PreferenceUtils {
     public static String getField(Context context, String field) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(field, null);
+    }
+
+    public static void setRegistrationProcess(Context context, int state) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putInt(REGISTRATION_STATE, state).apply();
+    }
+
+    public static int getRegistrationProcess(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt(REGISTRATION_STATE, 0);
     }
 
 }

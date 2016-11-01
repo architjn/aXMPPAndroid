@@ -13,6 +13,7 @@ import android.widget.EditText;
 
 import com.architjn.myapp.R;
 import com.architjn.myapp.service.XMPPConnection;
+import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -23,8 +24,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class RegisterActivity extends AppCompatActivity implements XMPPHelper.OnStateChange {
 
-    private EditText name, phno;
-    private CircleImageView avatar;
+    private EditText phno;
+//    private CircleImageView avatar;
     private Button login;
     private ProgressDialog pd;
 
@@ -38,15 +39,15 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         XMPPHelper.getInstance(this).addActionStateChanged(this);
-        avatar = (CircleImageView) findViewById(R.id.avatar);
-        name = (EditText) findViewById(R.id.name);
+//        avatar = (CircleImageView) findViewById(R.id.avatar);
+//        name = (EditText) findViewById(R.id.name);
         phno = (EditText) findViewById(R.id.phno);
         login = (Button) findViewById(R.id.login);
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent broad = new Intent(XMPPConnection.ACTION_SIGNUP);
-                broad.putExtra("name", name.getText().toString());
+//                broad.putExtra("name", name.getText().toString());
                 broad.putExtra("phno", phno.getText().toString());
                 sendBroadcast(broad);
             }
@@ -65,9 +66,10 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
             if (pd != null && pd.isShowing())
                 pd.dismiss();
             if (!isFinishing()) {
-                startActivity(new Intent(this, MainActivity.class));
+                startActivity(new Intent(this, ProfileSetupActivity.class));
                 finish();
             }
+            PreferenceUtils.setRegistrationProcess(this, 1);
         } else if (state == XMPPHelper.State.DISCONNECTED) {
             if (pd != null && pd.isShowing())
                 pd.dismiss();

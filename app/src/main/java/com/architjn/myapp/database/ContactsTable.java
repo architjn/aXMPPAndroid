@@ -77,6 +77,7 @@ public class ContactsTable {
         values.putNull(LAST_SEEN);
         if (isContact)
             values.put(IS_CONTACT, 1);
+        else values.put(IS_CONTACT, 0);
         return db.insert(TABLE_NAME, null, values);
     }
 
@@ -100,7 +101,7 @@ public class ContactsTable {
         return contacts;
     }
 
-    public static Contact getUser(SQLiteDatabase db, String id) {
+    static Contact getUser(SQLiteDatabase db, String id) {
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?", new String[]{id});
         if (c.moveToFirst())
             return new Contact(c.getString(c.getColumnIndex(ID)),
@@ -110,14 +111,14 @@ public class ContactsTable {
         else return null;
     }
 
-    public static void updateWithNewUser(SQLiteDatabase db, Contact c) {
+    static void updateWithNewUser(SQLiteDatabase db, Contact c) {
         String id = doesUserExists(db, c.getPhoneNumber());
         if (id == null) {
             addUser(db, c, true);
         } else updateUser(db, c, id, true);
     }
 
-    public static Contact getUserWithMobile(Context context, SQLiteDatabase db, String mobile, boolean isContact)
+    static Contact getUserWithMobile(Context context, SQLiteDatabase db, String mobile, boolean isContact)
             throws SmackInvocationException {
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE " + PHONE + " = ?", new String[]{mobile});
         if (c.moveToFirst())

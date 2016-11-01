@@ -44,8 +44,17 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (PreferenceUtils.getField(this, PreferenceUtils.USER) == null) {
-            startActivity(new Intent(this, RegisterActivity.class));
+        if (PreferenceUtils.getField(this, PreferenceUtils.USER) == null ||
+                PreferenceUtils.getRegistrationProcess(this) != 3) {
+            if (PreferenceUtils.getField(this, PreferenceUtils.USER) == null)
+                PreferenceUtils.setRegistrationProcess(this, 0);
+            int state = PreferenceUtils.getRegistrationProcess(this);
+            if (state == 0)
+                startActivity(new Intent(this, RegisterActivity.class));
+            else if (state == 1)
+                startActivity(new Intent(this, ProfileSetupActivity.class));
+            else if (state == 2)
+                startActivity(new Intent(this, InitializationActivity.class));
             finish();
         }
         super.onCreate(savedInstanceState);

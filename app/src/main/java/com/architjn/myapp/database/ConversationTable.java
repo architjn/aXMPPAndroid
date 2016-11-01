@@ -2,6 +2,7 @@ package com.architjn.myapp.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -9,6 +10,7 @@ import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.Conversation;
 import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.xmpp.MessagePacketListener;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 
 import java.util.ArrayList;
@@ -33,8 +35,6 @@ public class ConversationTable {
     private static final String TIME = "conv_time";
     private static final String TYPE = "conv_type";
 
-    private static OnContentChanged listener;
-
     public static void onCreate(SQLiteDatabase database) {
         String SQL_CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -50,25 +50,20 @@ public class ConversationTable {
     public static void onUpgrade(SQLiteDatabase database) {
     }
 
-    public static void setContentChangedListener(OnContentChanged listener1) {
-        listener = listener1;
-    }
-
-    static void addConversation(Context context, SQLiteDatabase db, UserProfile user, String msg, boolean sent)
+    static void addConversation(Context context, SQLiteDatabase db, Contact user, String msg, boolean sent)
             throws SmackInvocationException {
-        String chatId = ChatTable.getChatId(db, ContactsTable.getUserWithMobile(context, db, user.getUserName(), false));
+        String chatId = ChatTable.getChatId(db, ContactsTable.getUserWithMobile(context, db, user.getPhoneNumber(), false));
         ContentValues values = new ContentValues();
         values.putNull(ID);
         values.put(MESSAGE, msg);
-        values.put(SENDER_ID, user.getUserName());
+        values.put(SENDER_ID, user.getPhoneNumber());
         values.put(CHAT_ID, chatId);
         values.put(STARRED, 0);
         if (sent) values.put(TYPE, 1);
         else values.put(TYPE, 0);
         db.insert(TABLE_NAME, null, values);
         ChatTable.updateTime(db, chatId);
-        if (listener != null)
-            listener.contentChanged(ChatTable.getChat(db, chatId));
+        context.sendBroadcast(new Intent(MessagePacketListener.UPDATE_CHAT));
     }
 
     public static ArrayList<Conversation> getAllConversation(SQLiteDatabase db, String chatId) {
@@ -94,10 +89,5 @@ public class ConversationTable {
         }
         return null;
     }
-
-    public interface OnContentChanged {
-        void contentChanged(Chat chat);
-    }
-
 
 }

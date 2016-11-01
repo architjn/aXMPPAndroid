@@ -85,12 +85,11 @@ public class XMPPHelper {
         }
     }
 
-    public void signupAndLogin(String username, String phno, byte[] avatar) throws SmackInvocationException {
+    public void signupAndLogin(String phno) throws SmackInvocationException {
         setState(State.CONNECTING);
         createConnection();
 
         Map<String, String> attributes = new HashMap<>();
-        attributes.put("name", username);
         attributes.put("phno", phno);
         try {
             Log.v("XMPPHelper", "creating account");
@@ -106,7 +105,7 @@ public class XMPPHelper {
         }
 
         login(phno);
-        vCardHelper.save(username, phno, avatar);
+        vCardHelper.save(phno);
     }
 
     public void login(String username) throws SmackInvocationException {
@@ -139,7 +138,7 @@ public class XMPPHelper {
     }
 
     public void sendChatMessage(String to, String body, PacketExtension packetExtension) throws SmackInvocationException {
-        if (to == null){
+        if (to == null) {
             Toast.makeText(context, "User Invalid", Toast.LENGTH_LONG).show();
             return;
         }
@@ -184,6 +183,10 @@ public class XMPPHelper {
 
     public static State getState() {
         return XMPPHelper.state;
+    }
+
+    public void updateProfile(String name, byte[] imgs) throws SmackInvocationException {
+        vCardHelper.save(name, PreferenceUtils.getField(context, PreferenceUtils.USER), null);
     }
 
     public enum State {

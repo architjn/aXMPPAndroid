@@ -3,6 +3,7 @@ package com.architjn.myapp.database;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
@@ -86,6 +87,7 @@ public class ChatTable {
         if (c.moveToFirst())
             do {
                 String lastMsg = ConversationTable.getLastChatMsg(db, c.getString(c.getColumnIndex(ID)));
+                Log.v("aaa", c.getString(c.getColumnIndex(UPDATED_ON)));
                 if (lastMsg != null)
                     chats.add(new Chat(c.getString(c.getColumnIndex(ID)), c.getString(c.getColumnIndex(CONTACT_ID)),
                             c.getString(c.getColumnIndex(UPDATED_ON)), lastMsg,

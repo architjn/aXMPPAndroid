@@ -7,4 +7,7 @@
     <string name="contacts">Contacts</string>
     <string name="enter_message">Say Something...</string>
     <string name="not_connected">Not connected</string>
+    <string name="profile">Profile</string>
+    <string name="save">Save</string>
+    <string name="init_app">Initializing Application</string>
 </resources>

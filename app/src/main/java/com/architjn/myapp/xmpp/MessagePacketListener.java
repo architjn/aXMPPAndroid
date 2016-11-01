@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.architjn.myapp.database.DbHelper;
+import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.ui.activity.ConversationActivity;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Message;
@@ -24,8 +26,9 @@ public class MessagePacketListener implements PacketListener {
         Message msg = (Message) packet;
         try {
             UserProfile user = XMPPHelper.getInstance(context).search(StringUtils.parseName(msg.getFrom()));
-            DbHelper.getInstance(context).addConversation(user, msg.getBody(), false);
-            context.sendBroadcast(new Intent(UPDATE_CHAT));
+            Contact contact = DbHelper.getInstance(context)
+                    .getContactWithNumber(StringUtils.parseName(msg.getFrom()));
+            DbHelper.getInstance(context).addConversation(contact, msg.getBody(), false);
             context.sendBroadcast(new Intent(user.getUserName()));
         } catch (SmackInvocationException e) {
             e.printStackTrace();

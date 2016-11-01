@@ -28,8 +28,14 @@
             android:name=".ui.activity.ContactsActivity"
             android:label="@string/contacts" />
         <activity android:name=".ui.activity.ConversationActivity" />
+        <activity
+            android:name=".ui.activity.ProfileSetupActivity"
+            android:label="@string/profile" />
+        <activity android:name=".ui.activity.InitializationActivity" />
 
         <service android:name=".service.XMPPConnection" />
+
+        <activity android:name=".ui.activity.UserProfileActivity"></activity>
     </application>
 
 </manifest>

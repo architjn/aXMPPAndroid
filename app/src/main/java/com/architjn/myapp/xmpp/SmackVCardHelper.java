@@ -74,4 +74,8 @@ public class SmackVCardHelper {
             throw new SmackInvocationException(e);
         }
     }
+
+    public void save(String phno) throws SmackInvocationException {
+        save(null, phno, null);
+    }
 }

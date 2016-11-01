@@ -59,12 +59,12 @@ public class DbHelper extends SQLiteOpenHelper {
         return ContactsTable.getUser(this.getWritableDatabase(), id);
     }
 
-    public void addConversation(UserProfile user, String msg, boolean sent) throws SmackInvocationException {
+    public void addConversation(Contact user, String msg, boolean sent) throws SmackInvocationException {
         ConversationTable.addConversation(context, this.getWritableDatabase(), user, msg, sent);
     }
 
-    public ArrayList<Conversation> getAllConversations(String chatId){
-        return ConversationTable.getAllConversation(this.getWritableDatabase(),chatId);
+    public ArrayList<Conversation> getAllConversations(String chatId) {
+        return ConversationTable.getAllConversation(this.getWritableDatabase(), chatId);
     }
 
     public Chat getChatByUserId(String id) {
@@ -77,5 +77,10 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public Chat getChat(String chatId) {
         return ChatTable.getChat(this.getWritableDatabase(), chatId);
+    }
+
+    public Contact getContactWithNumber(String number) throws SmackInvocationException {
+        return ContactsTable.getUserWithMobile(context, this.getReadableDatabase(),
+                number, false);
     }
 }

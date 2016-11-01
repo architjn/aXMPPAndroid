@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -69,8 +70,16 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
             currentUser = DbHelper.getInstance(this).getContact(chat.getContactId());
         }
         registerReceiver(br, new IntentFilter(currentUser.getPhoneNumber()));
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(Utils.getContactName(this, currentUser.getPhoneNumber()));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         rv = (RecyclerView) findViewById(R.id.conv_list);
         layout = new LinearLayoutManager(this);
         rv.setLayoutManager(layout);
@@ -106,9 +115,9 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
                         try {
                             XMPPHelper.getInstance(ConversationActivity.this)
                                     .sendChatMessage(currentUser.getJid(), msg.getText().toString(), null);
-                            UserProfile user = XMPPHelper.getInstance(ConversationActivity.this)
-                                    .search(StringUtils.parseName(currentUser.getJid()));
-                            DbHelper.getInstance(ConversationActivity.this).addConversation(user,
+                            Contact contact = DbHelper.getInstance(ConversationActivity.this)
+                                    .getContactWithNumber(StringUtils.parseName(currentUser.getJid()));
+                            DbHelper.getInstance(ConversationActivity.this).addConversation(contact,
                                     msg.getText().toString(), true);
                             updateList();
                             msg.setText(null);
@@ -132,5 +141,15 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
         adapter.updateItems(DbHelper.getInstance(ConversationActivity.this)
                 .getAllConversations(chat.getId()));
         layout.scrollToPosition(adapter.getItemCount() - 1);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
