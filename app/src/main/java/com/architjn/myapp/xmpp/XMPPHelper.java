@@ -56,6 +56,17 @@ public class XMPPHelper {
     public void addActionStateChanged(OnStateChange listener) {
         listeners.add(listener);
         listener.stateChanged(state);
+        /*if (state == State.CONNECTING) {
+            listener.stateChanged(state);
+        } else if (conn == null && state != State.DISCONNECTED)
+            setState(State.DISCONNECTED);
+        else if (conn != null && conn.isConnected() && !conn.isAuthenticated() && state != State.CONNECTED)
+            setState(State.CONNECTED);
+        else if (conn != null && conn.isAuthenticated() && state != State.AUTHENTICATED)
+            setState(State.AUTHENTICATED);
+        else {
+            setState(State.DISCONNECTED);
+        }*/
     }
 
     public static XMPPHelper getInstance(Context context) {
@@ -66,8 +77,9 @@ public class XMPPHelper {
     }
 
     private void createConnection() {
-        if (conn != null)
+        if (state != State.DISCONNECTED)
             return;
+        setState(State.CONNECTING);
         Log.v("XMPPHelper", "creating connection");
         ConnectionConfiguration connConfig =
                 new ConnectionConfiguration(Constants.SERVERNAME,
@@ -85,8 +97,7 @@ public class XMPPHelper {
         }
     }
 
-    public void signupAndLogin(String phno) throws SmackInvocationException {
-        setState(State.CONNECTING);
+    public void signupAndLogin(String phno, String countryCode, String country) throws SmackInvocationException {
         createConnection();
 
         Map<String, String> attributes = new HashMap<>();
@@ -105,12 +116,13 @@ public class XMPPHelper {
         }
 
         login(phno);
-        vCardHelper.save(phno);
+        vCardHelper.save(phno, country, countryCode);
     }
 
     public void login(String username) throws SmackInvocationException {
         createConnection();
-
+        if (conn.isConnected())
+            setState(State.CONNECTED);
         try {
             Log.v("XMPPHelper", "logging in");
             if (!conn.isAuthenticated()) {
@@ -127,9 +139,11 @@ public class XMPPHelper {
             throw new SmackInvocationException(e);
         }
         setState(State.CONNECTED);
+        if (conn.isAuthenticated())
+            setState(State.AUTHENTICATED);
     }
 
-    private void onConnectionEstablished() {
+    private void onConnectionEstablished() throws Exception {
         conn.sendPacket(new Presence(Presence.Type.available));
         vCardHelper = new SmackVCardHelper(context, conn);
         conn.addPacketListener(new MessagePacketListener(context), new MessageTypeFilter(Message.Type.chat));
@@ -174,6 +188,7 @@ public class XMPPHelper {
     }
 
     public void setState(State state) {
+        Log.v("state change : ", state.toString());
         XMPPHelper.state = state;
         for (OnStateChange listener : listeners) {
             if (listener != null)
@@ -181,16 +196,17 @@ public class XMPPHelper {
         }
     }
 
-    public static State getState() {
-        return XMPPHelper.state;
+    public XMPPConnection getConn() {
+        return conn;
     }
 
-    public void updateProfile(String name, byte[] imgs) throws SmackInvocationException {
-        vCardHelper.save(name, PreferenceUtils.getField(context, PreferenceUtils.USER), null);
+    public void updateProfile(String name, String username, byte[] imgs) throws SmackInvocationException {
+        vCardHelper.save(name, username, PreferenceUtils.getField(context, PreferenceUtils.USER),
+                null, null, imgs);
     }
 
     public enum State {
-        DISCONNECTED, CONNECTING, CONNECTED
+        DISCONNECTED, CONNECTING, CONNECTED, AUTHENTICATED
     }
 
     public interface OnStateChange {

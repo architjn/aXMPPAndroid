@@ -94,4 +94,10 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
         if (state == XMPPHelper.State.CONNECTED) {
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(br);
+    }
 }

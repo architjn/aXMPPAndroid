@@ -10,4 +10,12 @@
     <string name="profile">Profile</string>
     <string name="save">Save</string>
     <string name="init_app">Initializing Application</string>
+    <string name="mute">Mute</string>
+    <string name="status">Status</string>
+    <string name="number">Number</string>
+    <string name="username">Username</string>
+    <string name="init_failed">Initialization failed</string>
+    <string name="fill_all_fields">Fill in all fields</string>
+    <string name="loading_peeps">Loading your peeps...</string>
+    <string name="this_may_take_some_time">This may take some time</string>
 </resources>

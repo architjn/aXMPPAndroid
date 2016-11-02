@@ -2,6 +2,7 @@ package com.architjn.myapp.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,11 @@ import android.widget.TextView;
 
 import com.architjn.myapp.R;
 import com.architjn.myapp.model.Contact;
+import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.Utils;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -45,6 +49,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         final Contact item = items.get(position);
         holder.name.setText(Utils.getContactName(context, item.getPhoneNumber()));
         holder.status.setText(item.getStatus());
+        holder.photo.setImageDrawable(null);
+        Picasso.with(context).load(new File(Constants.getProfileThumbFolder(context)
+                + File.separator
+                + item.getPhoneNumber() + ".jpg"))
+                .placeholder(R.drawable.ic_account_black_56dp)
+                .into(holder.photo);
         holder.mainView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

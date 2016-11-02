@@ -22,6 +22,7 @@ import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.service.XMPPConnection;
 import com.architjn.myapp.utils.Utils;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
@@ -77,7 +78,9 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent i = new Intent(ConversationActivity.this, UserProfileActivity.class);
+                i.putExtra("id", currentUser.getId());
+                startActivity(i);
             }
         });
         rv = (RecyclerView) findViewById(R.id.conv_list);
@@ -107,7 +110,7 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
 
     @Override
     public void stateChanged(XMPPHelper.State state) {
-        if (state == XMPPHelper.State.CONNECTED) {
+        if (state == XMPPHelper.State.AUTHENTICATED) {
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -127,7 +130,8 @@ public class ConversationActivity extends AppCompatActivity implements XMPPHelpe
                     }
                 }
             });
-        } else if (state == XMPPHelper.State.CONNECTING || state == XMPPHelper.State.DISCONNECTED) {
+        } else if (state == XMPPHelper.State.DISCONNECTED) {
+            sendBroadcast(new Intent(XMPPConnection.ACTION_CONNECT));
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

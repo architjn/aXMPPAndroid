@@ -1,17 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:text="@string/loading_peeps"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="156dp"
+                android:layout_height="156dp"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
+        </FrameLayout>
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/init_app"
-        android:textColor="@android:color/black"
-        android:textSize="22sp" />
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:id="@+id/takes_time"
+        android:visibility="invisible"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_weight="0"
+        android:padding="20dp"
+        android:text="@string/this_may_take_some_time"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
 </LinearLayout>

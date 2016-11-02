@@ -5,17 +5,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.preference.Preference;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.util.Log;
 
+import com.architjn.myapp.model.PhoneContactInfo;
+import com.architjn.myapp.ui.activity.ContactsActivity;
 import com.architjn.myapp.ui.activity.ProfileSetupActivity;
+import com.architjn.myapp.utils.ContactsUtils;
 import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 /**
  * Created by architjn on 10/10/2016.
@@ -25,7 +30,10 @@ public class XMPPConnection extends Service {
 
     public static final String ACTION_LOGIN = "action_login";
     public static final String ACTION_SIGNUP = "action_signup";
+    public static final String ACTION_CONNECT = "action_connect";
     public static final String ACTION_PROFILE = "action_profile";
+    public static final String ACTION_UPDATE_CONTACTS = "action_update_contacts";
+    public static Bitmap userPhoto = null;
 
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
@@ -50,6 +58,26 @@ public class XMPPConnection extends Service {
                         }
                     }.execute(intent.getStringExtra("phno"));
                     break;
+                case ACTION_CONNECT:
+                    new AsyncTask<String, Void, String>() {
+                        @Override
+                        protected void onPostExecute(String s) {
+                            super.onPostExecute(s);
+                        }
+
+                        @Override
+                        protected String doInBackground(String... strings) {
+                            try {
+                                XMPPHelper.getInstance(context).signupAndLogin(strings[0],
+                                        null, null);
+                            } catch (SmackInvocationException e) {
+                                Log.v("XMPPConnection", e.getMessage());
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+                    }.execute(PreferenceUtils.getField(context, PreferenceUtils.USER));
+                    break;
                 case ACTION_SIGNUP:
                     new AsyncTask<String, Void, String>() {
                         @Override
@@ -60,14 +88,17 @@ public class XMPPConnection extends Service {
                         @Override
                         protected String doInBackground(String... strings) {
                             try {
-                                XMPPHelper.getInstance(context).signupAndLogin(strings[0]);
+                                XMPPHelper.getInstance(context).signupAndLogin(strings[0],
+                                        strings[1], strings[2]);
                             } catch (SmackInvocationException e) {
                                 Log.v("XMPPConnection", e.getMessage());
                                 e.printStackTrace();
                             }
                             return null;
                         }
-                    }.execute(intent.getStringExtra("phno"));
+                    }.execute(intent.getStringExtra("phno"),
+                            intent.getStringExtra("country_code"),
+                            intent.getStringExtra("country"));
                     break;
                 case ACTION_PROFILE:
                     new AsyncTask<String, Void, String>() {
@@ -80,14 +111,45 @@ public class XMPPConnection extends Service {
                         @Override
                         protected String doInBackground(String... strings) {
                             try {
-                                XMPPHelper.getInstance(context).updateProfile(strings[0], intent.getByteArrayExtra("img"));
+                                if (userPhoto != null) {
+                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                    userPhoto.compress(Bitmap.CompressFormat.PNG, 50, stream);
+                                    XMPPHelper.getInstance(context).updateProfile(strings[0],
+                                            strings[1],
+                                            stream.toByteArray());
+                                } else {
+                                    XMPPHelper.getInstance(context).updateProfile(strings[0],
+                                            strings[1], null);
+                                }
                             } catch (SmackInvocationException e) {
+                                XMPPHelper.getInstance(context).setState(XMPPHelper.State.DISCONNECTED);
                                 Log.v("XMPPConnection", e.getMessage());
                                 e.printStackTrace();
                             }
                             return null;
                         }
-                    }.execute(intent.getStringExtra("name"));
+                    }.execute(intent.getStringExtra("name"), intent.getStringExtra("username"));
+                    break;
+                case ACTION_UPDATE_CONTACTS:
+                    new AsyncTask<Void, Void, Void>() {
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            sendBroadcast(new Intent(ContactsActivity.CONTACTS_UPDATED));
+                        }
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            try {
+                                ArrayList<PhoneContactInfo> allContacts = ContactsUtils.getAllPhoneContacts(context);
+                                ContactsUtils.getAllUserContacts(context, allContacts, null);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+                    }.execute();
                     break;
             }
         }
@@ -106,7 +168,9 @@ public class XMPPConnection extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_LOGIN);
         filter.addAction(ACTION_SIGNUP);
+        filter.addAction(ACTION_CONNECT);
         filter.addAction(ACTION_PROFILE);
+        filter.addAction(ACTION_UPDATE_CONTACTS);
         registerReceiver(br, filter);
         return START_STICKY;
     }

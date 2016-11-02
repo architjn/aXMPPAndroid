@@ -1,7 +1,10 @@
 package com.architjn.myapp.ui.activity;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -22,6 +25,7 @@ import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.PhoneContactInfo;
 import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.service.XMPPConnection;
 import com.architjn.myapp.utils.ContactsUtils;
 import com.architjn.myapp.utils.PermissionUtils;
 import com.architjn.myapp.utils.Utils;
@@ -39,8 +43,19 @@ import java.util.ArrayList;
 
 public class ContactsActivity extends AppCompatActivity {
 
+    public static final String CONTACTS_UPDATED = "contacts_updated";
     private RecyclerView rv;
     private ContactAdapter adapter;
+    private BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().matches(CONTACTS_UPDATED)) {
+                if (adapter != null)
+                    adapter.updateItems(DbHelper.getInstance(ContactsActivity.this)
+                            .loadContacts());
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +66,7 @@ public class ContactsActivity extends AppCompatActivity {
 
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        registerReceiver(br, new IntentFilter(CONTACTS_UPDATED));
         rv = (RecyclerView) findViewById(R.id.contact_list);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.addItemDecoration(new ListDividerItemDecoration(this, Utils.dpToPx(this, 40)));
@@ -66,41 +82,32 @@ public class ContactsActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
-        PermissionUtils.checkPermission(Manifest.permission.READ_CONTACTS,
-                new PermissionUtils.Callback() {
-                    @Override
-                    public void onChange(boolean state) {
-                        if (state) {
-                            canLoadList();
-                        } else cannotProceed();
-                    }
-                });
+        XMPPHelper.getInstance(this).addActionStateChanged(new XMPPHelper.OnStateChange() {
+            @Override
+            public void stateChanged(XMPPHelper.State state) {
+                if (state == XMPPHelper.State.AUTHENTICATED)
+                    PermissionUtils.checkPermission(Manifest.permission.READ_CONTACTS,
+                            new PermissionUtils.Callback() {
+                                @Override
+                                public void onChange(boolean state) {
+                                    if (state) {
+                                        sendBroadcast(new Intent(XMPPConnection.ACTION_UPDATE_CONTACTS));
+                                    } else cannotProceed();
+                                }
+                            });
+                else if (state == XMPPHelper.State.DISCONNECTED)
+                    sendBroadcast(new Intent(XMPPConnection.ACTION_CONNECT));
+            }
+        });
     }
 
     private void cannotProceed() {
         Toast.makeText(this, "Need permission to proceed", Toast.LENGTH_LONG).show();
     }
 
-    private void canLoadList() {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                adapter.updateItems(DbHelper.getInstance(ContactsActivity.this)
-                        .loadContacts());
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                Log.v("qqq", "checking contacts");
-                ArrayList<PhoneContactInfo> allContacts = ContactsUtils.getAllPhoneContacts(ContactsActivity.this);
-                ContactsUtils.getAllUserContacts(ContactsActivity.this, allContacts);
-                return null;
-            }
-        }.execute();
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(br);
     }
-
-
 }

@@ -14,8 +14,11 @@ import com.architjn.myapp.database.ConversationTable;
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Chat;
 import com.architjn.myapp.model.Contact;
+import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.Utils;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -53,11 +56,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         final Chat item = items.get(position);
+        final Contact contact = DbHelper.getInstance(context)
+                .getContact(item.getContactId());
         holder.name.setText(
-                Utils.getContactName(context, DbHelper.getInstance(context)
-                        .getContact(item.getContactId())
-                        .getPhoneNumber()));
+                Utils.getContactName(context, contact.getPhoneNumber()));
         holder.lastMsg.setText(item.getLastMsg());
+        holder.photo.setImageDrawable(null);
+        Picasso.with(context).load(new File(Constants.getProfileThumbFolder(context)
+                + File.separator
+                + contact.getPhoneNumber() + ".jpg"))
+                .placeholder(R.drawable.ic_account_black_56dp)
+                .into(holder.photo);
         holder.mainView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

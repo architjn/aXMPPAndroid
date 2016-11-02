@@ -4,8 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 
+import java.net.URISyntaxException;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -38,5 +40,21 @@ public class Utils {
         if (c.moveToFirst())
             return c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
         else return phno;
+    }public static String getPathOfImage(Context context, Uri uri) throws URISyntaxException {
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            String document_id = cursor.getString(0);
+            document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
+            cursor.close();
+
+            cursor = context.getContentResolver().query(
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+            if (cursor.moveToFirst()) {
+                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                cursor.close();
+                return path;
+            } else return null;
+        } else return null;
     }
 }

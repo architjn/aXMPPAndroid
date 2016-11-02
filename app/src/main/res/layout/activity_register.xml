@@ -3,9 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar" />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:foreground="?attr/selectableItemBackground"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,49 +22,86 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@mipmap/ic_launcher" />
-        <!--
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="92dp"
-                    android:layout_height="92dp"
-                    android:src="@drawable/ic_person_black_92dp"
-                    app:civ_border_width="2dp" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <EditText
-                        android:id="@+id/name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/name" />
-                </android.support.design.widget.TextInputLayout>
-        -->
-
-        <android.support.design.widget.TextInputLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:paddingTop="60dp">
 
-            <EditText
-                android:id="@+id/phno"
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center"
+                android:src="@mipmap/ic_launcher" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <Spinner
+                android:id="@+id/spinner_country"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/border_field"
+                android:drawableRight="@drawable/ic_dropdown_black_24dp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/phono" />
-        </android.support.design.widget.TextInputLayout>
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/login"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="?attr/colorAccent"
-            android:text="@string/login"
-            android:textColor="@android:color/white" />
+                <EditText
+                    android:id="@+id/et_mobileNumberCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0"
+                    android:background="@drawable/border_field"
+                    android:inputType="phone"
+                    android:minWidth="50dp"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textSize="18dp" />
+
+                <EditText
+                    android:id="@+id/phno"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/border_field"
+                    android:hint="Mobile Number"
+                    android:inputType="phone"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="?attr/colorAccent"
+                android:text="@string/login"
+                android:textColor="@android:color/white" />
+
+            <ProgressBar
+                android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

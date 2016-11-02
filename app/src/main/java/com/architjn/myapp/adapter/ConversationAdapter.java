@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import com.architjn.myapp.R;
 import com.architjn.myapp.model.Conversation;
+import com.architjn.myapp.utils.Constants;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -56,6 +59,14 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         setBackground(holder, position);
         final Conversation item = items.get(position);
         holder.text.setText(item.getMessage());
+        if (items.get(position).isSent()) {
+            holder.userImg.setImageDrawable(null);
+            Picasso.with(context).load(new File(Constants.getProfileThumbFolder(context)
+                    + File.separator
+                    + item.getSenderId() + ".jpg"))
+                    .placeholder(R.drawable.ic_account_black_56dp)
+                    .into(holder.userImg);
+        }
         holder.mainView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,6 +105,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         } else {
             if (position == 0) {
                 if (position + 1 != items.size() && items.get(position + 1).isSent())
+                    holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right);
+                else if (position + 1 == items.size())
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right);
                 else holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right_top);
             } else if (!items.get(position - 1).isSent()) {

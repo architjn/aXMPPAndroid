@@ -3,19 +3,24 @@ package com.architjn.myapp.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.architjn.myapp.R;
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.PhoneContactInfo;
 import com.architjn.myapp.model.UserProfile;
+import com.architjn.myapp.ui.activity.InitializationActivity;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +31,7 @@ public class ContactsUtils {
 
     public static ArrayList<PhoneContactInfo> getAllPhoneContacts(Context context) {
         ArrayList<PhoneContactInfo> arrContacts = new ArrayList<>();
-        PhoneContactInfo phoneContactInfo = null;
+        PhoneContactInfo phoneContactInfo;
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         Cursor cursor = context.getContentResolver().query(uri, new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER,
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone._ID},
@@ -36,7 +41,7 @@ public class ContactsUtils {
                 String contactNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 String contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 int phoneContactID = cursor.getInt(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID));
-                if (contactNumber.startsWith("*") || contactNumber.startsWith("#") || !isNumberValid(contactNumber))
+                if (!isNumberValid(contactNumber))
                     continue;
                 phoneContactInfo = new PhoneContactInfo();
                 phoneContactInfo.setPhoneContactID(phoneContactID);
@@ -65,12 +70,18 @@ public class ContactsUtils {
         } catch (NumberParseException e) {
             System.err.println("NumberParseException was thrown: " + e.toString());
             contactNumber = contactNumber.replaceAll("[()\\-\\s]", "").trim();
+            if (contactNumber.startsWith("0"))
+                contactNumber = contactNumber.substring(1);
         }
         return contactNumber;
     }
 
-    public static void getAllUserContacts(Context context, ArrayList<PhoneContactInfo> allContacts) {
-        for (PhoneContactInfo info : allContacts)
+    public static void getAllUserContacts(Context context, ArrayList<PhoneContactInfo> allContacts,
+                                          InitializationActivity.OnCountUpdate listener) throws Exception {
+        int errorCount = 0, count = 0;
+        for (PhoneContactInfo info : allContacts) {
+            if (listener != null)
+                listener.countUpdated(count++, allContacts.size());
             try {
                 UserProfile user = XMPPHelper.getInstance(context).search(info.getContactNumber());
                 Log.v("aaa", info.getContactName() + " -- " + info.getContactNumber());
@@ -78,9 +89,28 @@ public class ContactsUtils {
                     Log.v("aaa", "passed ^");
                     DbHelper.getInstance(context).updateContact(new Contact(null, user.getUserName(), user.getAvatar(),
                             user.getNickname(), user.getStatus(), null, user.getJid()));
+                    if (user.getAvatar() != null)
+                        saveUserImage(context, user.getAvatar(), user.getUserName());
                 }
+                if (allContacts.size() / 2 < errorCount)
+                    throw new Exception("Failed Initialization");
             } catch (SmackInvocationException e) {
                 e.printStackTrace();
+                errorCount++;
             }
+        }
+    }
+
+    public static void saveUserImage(Context context, byte[] avatar, String phno) {
+        Log.d("aaa", "saveUserImage: " + phno);
+        File photo = new File(Constants.getProfileThumbFolder(context), phno + ".jpg");
+        try {
+            FileOutputStream fos = new FileOutputStream(photo.getPath());
+            fos.write(avatar);
+            fos.close();
+        } catch (java.io.IOException e) {
+            Log.v("aaaa", phno);
+            e.printStackTrace();
+        }
     }
 }

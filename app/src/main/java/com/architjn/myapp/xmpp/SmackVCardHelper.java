@@ -1,6 +1,7 @@
 package com.architjn.myapp.xmpp;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.architjn.myapp.R;
 
@@ -9,7 +10,10 @@ import org.jivesoftware.smackx.packet.VCard;
 
 public class SmackVCardHelper {
     public static final String FIELD_STATUS = "status";
+    public static final String FIELD_USERNAME = "username";
     public static final String FIELD_PHONE = "cell";
+    public static final String FIELD_COUNTRY_CODE = "country_code";
+    public static final String FIELD_COUNTRY = "country";
 
     private Context context;
     private XMPPConnection con;
@@ -19,22 +23,32 @@ public class SmackVCardHelper {
         this.con = con;
     }
 
-    public void save(String nickname, String phno, byte[] avatar) throws SmackInvocationException {
-        save(nickname, phno, null, avatar);
+    public void save(String nickname, String username, String phno,
+                     String country, String countryCode, byte[] avatar) throws SmackInvocationException {
+        save(nickname, username, phno, null, country, countryCode, avatar);
     }
 
-    public void save(String nickname, String phno, String jid, byte[] avatar) throws SmackInvocationException {
+    public void save(String nickname, String username, String phno, String jid,
+                     String country, String countryCode, byte[] avatar) throws SmackInvocationException {
         VCard vCard = new VCard();
         try {
             vCard.setNickName(nickname);
             vCard.setPhoneHome(FIELD_PHONE, phno);
+            if (country != null)
+                vCard.setField(FIELD_COUNTRY, country);
+            if (countryCode != null)
+                vCard.setField(FIELD_COUNTRY_CODE, countryCode);
+            if (username != null)
+                vCard.setField(FIELD_USERNAME, username);
             if (jid != null)
                 vCard.setJabberId(jid);
-            if (avatar != null)
+            if (avatar != null) {
                 vCard.setAvatar(avatar);
-            vCard.setField(FIELD_STATUS, context.getString(R.string.default_status));
+            } else
+                vCard.setField(FIELD_STATUS, context.getString(R.string.default_status));
             vCard.save(con);
         } catch (Exception e) {
+            XMPPHelper.getInstance(context).setState(XMPPHelper.State.DISCONNECTED);
             throw new SmackInvocationException(e);
         }
     }
@@ -75,7 +89,7 @@ public class SmackVCardHelper {
         }
     }
 
-    public void save(String phno) throws SmackInvocationException {
-        save(null, phno, null);
+    public void save(String phno, String country, String countryCode) throws SmackInvocationException {
+        save(null, null, phno, country, countryCode, null);
     }
 }
