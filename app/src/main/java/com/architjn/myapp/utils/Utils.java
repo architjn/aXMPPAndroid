@@ -1,5 +1,6 @@
 package com.architjn.myapp.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -30,6 +31,22 @@ public class Utils {
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    public static int getScreenWidth(Context context){
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager()
+                .getDefaultDisplay()
+                .getMetrics(displaymetrics);
+        return displaymetrics.widthPixels;
+    }
+
+    public static int getScreenHeight(Context context){
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager()
+                .getDefaultDisplay()
+                .getMetrics(displaymetrics);
+        return displaymetrics.heightPixels;
+    }
+
     public static String getContactName(Context context, String phno) {
         if (phno.isEmpty())
             return "";
@@ -40,7 +57,9 @@ public class Utils {
         if (c.moveToFirst())
             return c.getString(c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
         else return phno;
-    }public static String getPathOfImage(Context context, Uri uri) throws URISyntaxException {
+    }
+
+    public static String getPathOfImage(Context context, Uri uri) throws URISyntaxException {
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         if (cursor.moveToFirst()) {
             String document_id = cursor.getString(0);

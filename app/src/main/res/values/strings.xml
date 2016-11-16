@@ -18,4 +18,6 @@
     <string name="fill_all_fields">Fill in all fields</string>
     <string name="loading_peeps">Loading your peeps...</string>
     <string name="this_may_take_some_time">This may take some time</string>
+    <string name="reconnecting">Reconnecting...</string>
+    <string name="wallpaper">Wallpaper</string>
 </resources>

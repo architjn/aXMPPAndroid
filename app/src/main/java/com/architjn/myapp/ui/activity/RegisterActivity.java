@@ -2,6 +2,7 @@ package com.architjn.myapp.ui.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -14,13 +15,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.architjn.myapp.R;
+import com.architjn.myapp.api.ApiCaller;
+import com.architjn.myapp.model.UserProfile;
 import com.architjn.myapp.service.XMPPConnection;
 import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.PreferenceUtils;
+import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
 
+import org.jivesoftware.smackx.packet.VCard;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
     private Spinner spinnerCountry;
     private EditText phnCode;
     private View loading;
+    private String code, phone, country;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,11 +64,15 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
         loading = findViewById(R.id.loading);
         spinnerCountry = (Spinner) findViewById(R.id.spinner_country);
         phnCode = (EditText) findViewById(R.id.et_mobileNumberCode);
-        final ArrayList<String> countries = new ArrayList<String>();
+        final ArrayList<String> countries = new ArrayList<>();
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (validFields()) {
+                    login.setClickable(false);
+                    code = phnCode.getText().toString();
+                    phone = phno.getText().toString();
+                    country = countries.get(spinnerCountry.getSelectedItemPosition());
                     loading.setVisibility(View.VISIBLE);
                     Intent broad = new Intent(XMPPConnection.ACTION_SIGNUP);
                     broad.putExtra("country_code", phnCode.getText().toString());
@@ -111,13 +122,8 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
 
     @Override
     public void stateChanged(XMPPHelper.State state) {
-        if (state == XMPPHelper.State.CONNECTING) {
-        } else if (state == XMPPHelper.State.AUTHENTICATED) {
-            PreferenceUtils.setRegistrationProcess(this, 1);
-            if (!isFinishing()) {
-                startActivity(new Intent(this, ProfileSetupActivity.class));
-                finish();
-            }
+        if (state == XMPPHelper.State.AUTHENTICATED) {
+            saveUser(PreferenceUtils.getField(RegisterActivity.this, PreferenceUtils.JID));
         } else if (state == XMPPHelper.State.DISCONNECTED) {
             try {
                 login.setClickable(true);
@@ -126,5 +132,35 @@ public class RegisterActivity extends AppCompatActivity implements XMPPHelper.On
                 e.printStackTrace();
             }
         }
+    }
+
+    private void saveUser(final String jid) {
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... strings) {
+                return ApiCaller.getCaller().signup(strings[0], strings[1], strings[2], strings[3]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                try {
+                    JSONObject res = new JSONObject(s);
+                    if (res.getInt("status") == 1) {
+                        PreferenceUtils.setRegistrationProcess(RegisterActivity.this, 1);
+                        PreferenceUtils.setField(RegisterActivity.this, PreferenceUtils.COUNTRY_CODE, code);
+                        if (!isFinishing()) {
+                            startActivity(new Intent(RegisterActivity.this, ProfileSetupActivity.class));
+                            finish();
+                        }
+                    } else Toast.makeText(RegisterActivity.this,
+                            "Error", Toast.LENGTH_LONG).show();
+                    login.setClickable(true);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    saveUser(PreferenceUtils.getField(RegisterActivity.this, PreferenceUtils.JID));
+                }
+            }
+        }.execute(code, phone, country, jid);
     }
 }

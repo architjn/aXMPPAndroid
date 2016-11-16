@@ -113,6 +113,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 if (position + 1 != items.size() && !items.get(position + 1).isSent())
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right_middle);
                 else holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right_bottom);
+            } else if (position + 1 == items.size()) {
+                holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right);
             } else {
                 if (position + 1 != items.size() && items.get(position + 1).isSent())
                     holder.bgHolder.setBackgroundResource(R.drawable.chat_bubble_right);

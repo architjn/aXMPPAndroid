@@ -114,6 +114,7 @@ public class XMPPConnection extends Service {
                                 if (userPhoto != null) {
                                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                     userPhoto.compress(Bitmap.CompressFormat.PNG, 50, stream);
+                                    Log.v("photo-1", stream.toByteArray().toString());
                                     XMPPHelper.getInstance(context).updateProfile(strings[0],
                                             strings[1],
                                             stream.toByteArray());
@@ -131,6 +132,12 @@ public class XMPPConnection extends Service {
                     }.execute(intent.getStringExtra("name"), intent.getStringExtra("username"));
                     break;
                 case ACTION_UPDATE_CONTACTS:
+                    ContactsUtils.loadAllContacts(context, new ContactsUtils.OnLoadFinished() {
+                        @Override
+                        public void finished() {
+                            sendBroadcast(new Intent(ContactsActivity.CONTACTS_UPDATED));
+                        }
+                    });/*
                     new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -143,13 +150,13 @@ public class XMPPConnection extends Service {
                         protected Void doInBackground(Void... voids) {
                             try {
                                 ArrayList<PhoneContactInfo> allContacts = ContactsUtils.getAllPhoneContacts(context);
-                                ContactsUtils.getAllUserContacts(context, allContacts, null);
+//                                ContactsUtils.getAllUserContacts(context, allContacts, null);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             return null;
                         }
-                    }.execute();
+                    }.execute();*/
                     break;
             }
         }

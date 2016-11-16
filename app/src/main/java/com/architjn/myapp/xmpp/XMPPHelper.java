@@ -187,6 +187,16 @@ public class XMPPHelper {
         return nickname == null ? null : new UserProfile(jid, vCard);
     }
 
+    public UserProfile getSelf() throws SmackInvocationException {
+        if (vCardHelper == null) {
+            return null;
+        }
+        VCard vCard = vCardHelper.loadVCard();
+        String nickname = vCard.getNickName();
+
+        return nickname == null ? null : new UserProfile(vCard.getJabberId(), vCard);
+    }
+
     public void setState(State state) {
         Log.v("state change : ", state.toString());
         XMPPHelper.state = state;

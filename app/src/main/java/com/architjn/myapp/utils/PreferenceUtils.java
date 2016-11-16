@@ -9,7 +9,9 @@ import android.preference.PreferenceManager;
 
 public class PreferenceUtils {
 
+    public static String JID = "jid";
     public static String USER = "user";
+    public static String COUNTRY_CODE = "code";
     public static String REGISTRATION_STATE = "regState";
 
     public static void updateUser(Context context, String user) {
@@ -32,4 +34,8 @@ public class PreferenceUtils {
                 .getInt(REGISTRATION_STATE, 0);
     }
 
+    public static void setField(Context context, String field, String value) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString(field, value).apply();
+    }
 }

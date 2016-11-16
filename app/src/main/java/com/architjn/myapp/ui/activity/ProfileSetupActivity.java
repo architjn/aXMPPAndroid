@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -21,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.architjn.myapp.R;
+import com.architjn.myapp.api.ApiCaller;
 import com.architjn.myapp.service.XMPPConnection;
 import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.PreferenceUtils;
@@ -50,16 +52,39 @@ public class ProfileSetupActivity extends AppCompatActivity implements XMPPHelpe
     private Button save;
     private String finalFile;
     private Bitmap userPhoto = null;
+    private String usernameT, nameT;
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().matches(PROFILE_UPDATED)) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                if (userPhoto != null) {
+                    userPhoto.compress(Bitmap.CompressFormat.PNG, 50, stream);
+                    updateProfile(context, stream.toByteArray());
+                } else
+                    updateProfile(context, null);
+            }
+        }
+    };
+
+    private void updateProfile(final Context context, final byte[] bytes) {
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
                 PreferenceUtils.setRegistrationProcess(context, 2);
                 startActivity(new Intent(context, InitializationActivity.class));
                 finish();
             }
-        }
-    };
+
+            @Override
+            protected String doInBackground(String... strings) {
+                return ApiCaller.getCaller().updateProfile(strings[0], strings[1], strings[2], strings[3], strings[4], bytes);
+            }
+        }.execute(PreferenceUtils.getField(ProfileSetupActivity.this, PreferenceUtils.COUNTRY_CODE),
+                PreferenceUtils.getField(ProfileSetupActivity.this, PreferenceUtils.USER),
+                "Hi", nameT, usernameT);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,9 +103,13 @@ public class ProfileSetupActivity extends AppCompatActivity implements XMPPHelpe
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                XMPPHelper.getInstance(ProfileSetupActivity.this)
-                        .addActionStateChanged(ProfileSetupActivity.this);
-                progress.setVisibility(View.VISIBLE);
+                usernameT = username.getText().toString();
+                nameT = name.getText().toString();
+                if (isValid()) {
+                    XMPPHelper.getInstance(ProfileSetupActivity.this)
+                            .addActionStateChanged(ProfileSetupActivity.this);
+                    progress.setVisibility(View.VISIBLE);
+                }
             }
         });
         photo.setOnClickListener(new View.OnClickListener() {
@@ -159,5 +188,9 @@ public class ProfileSetupActivity extends AppCompatActivity implements XMPPHelpe
             Log.v("state: ", "disconnected reconnecting");
             sendBroadcast(new Intent(XMPPConnection.ACTION_CONNECT));
         }
+    }
+
+    public boolean isValid() {
+        return !username.getText().toString().matches("") && !name.getText().toString().matches("");
     }
 }

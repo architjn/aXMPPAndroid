@@ -15,9 +15,14 @@ import java.io.IOException;
 public class Constants {
 
     public static final String PROFILE_THUMB_FOLDER = "ProfileThumb";
+    public static final String BASE_URL = "http://musicbandhu.com/chat/";
+    public static final String SIGNUP = BASE_URL + "register/signup";
+    public static final String UPDATE_PROFILE = BASE_URL + "register/updateProfile";
+    public static final String LOAD_PROFILE = BASE_URL + "register/loadProfile";
+    public static final String CHECK_CONTACTS = BASE_URL + "contacts/check";
     public static int PORT = 5222;
     public static String SERVERNAME = "52.32.181.170";
-    public static final String COUNTRY_JSON ="{\n" +
+    public static final String COUNTRY_JSON = "{\n" +
             "  \"countries\": [\n" +
             "    {\n" +
             "      \"code\": \"+7 840\",\n" +
@@ -981,6 +986,13 @@ public class Constants {
             e.printStackTrace();
         }
         return path;
+    }
+
+    public static File getWallpaperFile(Context context) {
+        String path = Environment.getExternalStorageDirectory() +
+                File.separator + context.getString(R.string.app_name) + File.separator +
+                "wallpaper.jpg";
+        return new File(path);
     }
 //    public static String SERVERNAME = "107.180.68.152";
 

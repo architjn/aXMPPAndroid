@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.architjn.myapp.R;
+import com.architjn.myapp.api.ApiCaller;
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.model.PhoneContactInfo;
@@ -24,6 +25,10 @@ import com.architjn.myapp.utils.PermissionUtils;
 import com.architjn.myapp.utils.PreferenceUtils;
 import com.architjn.myapp.xmpp.SmackInvocationException;
 import com.architjn.myapp.xmpp.XMPPHelper;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -81,39 +86,18 @@ public class InitializationActivity extends AppCompatActivity {
             @Override
             public void stateChanged(XMPPHelper.State state) {
                 if (state == XMPPHelper.State.AUTHENTICATED) {
-                    new AsyncTask<Void, Void, Integer>() {
-
-                        @Override
-                        protected void onPostExecute(Integer res) {
-                            super.onPostExecute(res);
-                            if (res == 0) {
-                                Toast.makeText(InitializationActivity.this, R.string.init_failed,
-                                        Toast.LENGTH_LONG).show();
-                                return;
-                            }
-                            if (!isFinishing()) {
-                                PreferenceUtils.setRegistrationProcess(InitializationActivity.this, 3);
-                                startActivity(new Intent(InitializationActivity.this, MainActivity.class));
-                                finish();
-                            }
-                        }
-
-                        @Override
-                        protected Integer doInBackground(Void... voids) {
-                            try {
-                                ArrayList<PhoneContactInfo> allContacts = ContactsUtils
-                                        .getAllPhoneContacts(InitializationActivity.this);
-                                if (listener != null)
-                                    listener.countUpdated(0, allContacts.size());
-                                ContactsUtils.getAllUserContacts(InitializationActivity.this, allContacts, listener);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                return 0;
-                            }
-                            return 1;
-                        }
-                    }.execute();
-                } else if (state == XMPPHelper.State.CONNECTED) {
+                    ContactsUtils.loadAllContacts(InitializationActivity.this,
+                            new ContactsUtils.OnLoadFinished() {
+                                @Override
+                                public void finished() {
+                                    if (!isFinishing()) {
+                                        PreferenceUtils.setRegistrationProcess(InitializationActivity.this, 3);
+                                        startActivity(new Intent(InitializationActivity.this, MainActivity.class));
+                                        finish();
+                                    }
+                                }
+                            });
+                } else if (state == XMPPHelper.State.DISCONNECTED) {
                     sendBroadcast(new Intent(ACTION_CONNECT));
                 }
             }

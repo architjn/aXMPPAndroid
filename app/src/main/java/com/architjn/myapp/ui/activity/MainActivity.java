@@ -1,11 +1,16 @@
 package com.architjn.myapp.ui.activity;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,6 +49,28 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        boolean checkFingerprint = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //Fingerprint API only available on from Android 6.0 (M)
+            FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(Context.FINGERPRINT_SERVICE);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            if (!fingerprintManager.isHardwareDetected()) {
+                // Device doesn't support fingerprint authentication
+            } else if (!fingerprintManager.hasEnrolledFingerprints()) {
+                // User hasn't enrolled any fingerprints to authenticate with
+            } else {
+                checkFingerprint = true;
+            }
+        }
         if (PreferenceUtils.getField(this, PreferenceUtils.USER) == null ||
                 PreferenceUtils.getRegistrationProcess(this) != 3) {
             if (PreferenceUtils.getField(this, PreferenceUtils.USER) == null)
@@ -55,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements XMPPHelper.OnStat
                 startActivity(new Intent(this, ProfileSetupActivity.class));
             else if (state == 2)
                 startActivity(new Intent(this, InitializationActivity.class));
+            finish();
+        } else if (checkFingerprint && !getIntent().hasExtra("checked")) {
+            startActivity(new Intent(this, FingerprintActivity.class));
             finish();
         }
         super.onCreate(savedInstanceState);

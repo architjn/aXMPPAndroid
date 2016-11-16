@@ -2,6 +2,7 @@ package com.architjn.myapp.xmpp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.architjn.myapp.database.DbHelper;
 import com.architjn.myapp.model.Contact;
@@ -29,7 +30,6 @@ public class MessagePacketListener implements PacketListener {
             Contact contact = DbHelper.getInstance(context)
                     .getContactWithNumber(StringUtils.parseName(msg.getFrom()));
             DbHelper.getInstance(context).addConversation(contact, msg.getBody(), false);
-            context.sendBroadcast(new Intent(user.getUserName()));
         } catch (SmackInvocationException e) {
             e.printStackTrace();
         }

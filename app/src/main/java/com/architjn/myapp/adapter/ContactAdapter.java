@@ -12,6 +12,7 @@ import com.architjn.myapp.R;
 import com.architjn.myapp.model.Contact;
 import com.architjn.myapp.utils.Constants;
 import com.architjn.myapp.utils.Utils;
+import com.architjn.myapp.xmpp.XMPPHelper;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
